@@ -1,0 +1,48 @@
+@startuml
+' — Parámetros de estilo para un look profesional —
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Helvetica Neue"
+skinparam defaultFontSize 14
+skinparam activityBackgroundColor #F8F8F8
+skinparam activityBorderColor #34495E
+skinparam activityFontColor #2C3E50
+skinparam diamondBackgroundColor #FDFDFD
+skinparam diamondBorderColor #34495E
+skinparam diamondFontColor #2C3E50
+skinparam roundCorner 10
+skinparam shadowing false
+
+|**Fase: Ingesta & EDA**|
+start
+:Recolectar datasets;
+group Exploración de Datos
+  :Inspeccionar columnas;
+  :Detectar valores faltantes;
+  :Calcular estadísticas descriptivas;
+end
+
+|**Fase: Preprocesamiento**|
+group Limpieza de Datos
+  :Imputar valores faltantes;
+  :Corregir errores de formato;
+  :Eliminar outliers;
+end
+
+|**Fase: Análisis de Tendencias**|
+group Análisis de Series
+  :Visualizar ventas a lo largo del tiempo;
+  :Detectar patrones y estacionalidad;
+end
+
+|**Fase: Modelado (opcional)**|
+if (¿Incorporar modelado\nde series temporales?) then (Sí)
+  :Aplicar STL, ARIMA o Prophet;
+else (No)
+endif
+
+|**Fase: Entrega de Insights**|
+:Crear dashboard interactivo;
+:Generar recomendaciones estratégicas;
+:Entregar reporte ejecutivo + dashboard;
+stop
+@enduml

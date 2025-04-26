@@ -1,0 +1,60 @@
+```plantuml
+@startuml
+' Definición de componentes principales
+package "src/ingestion" {
+  [Ingestión de Datos] as Ingest
+}
+package "src/cleaning" {
+  [Limpieza de Datos] as Clean
+}
+package "src/analysis" {
+  [EDA y Tendencias] as Analysis
+}
+package "src/modeling" {
+  [Modelado Series Temporales] as Modeling
+}
+package "src/visualization" {
+  [Generador de Gráficos] as Plots
+  [Renderer de Dashboard] as Dash
+}
+package "src/utils" {
+  [Helpers (I/O, Logging, Config)] as Utils
+}
+package "data" {
+  folder "raw/" as RawData
+  folder "processed/" as ProcData
+}
+package "dashboards/interactive_dashboard" {
+  component "App Streamlit / Dash" as DashboardApp
+}
+
+' Conexiones de flujo de datos
+RawData --> Ingest : leer CSV / BD
+Ingest --> ProcData : guardar datos sin procesar
+ProcData --> Clean : cargar datos
+Clean --> ProcData : datos limpios
+ProcData --> Analysis : datos limpios
+Analysis --> Modeling : features / series
+Modeling --> ProcData : predicciones
+Analysis --> Plots : estadísticas
+Modeling --> Plots : forecast plots
+Plots --> Dash : componentes visuales
+Dash --> DashboardApp : renderizar UI
+
+' Dependencias transversales
+Utils <..> Ingest
+Utils <..> Clean
+Utils <..> Analysis
+Utils <..> Modeling
+Utils <..> Plots
+Utils <..> Dash
+
+@enduml
+
+**Cómo leerlo**  
+- Cada `package` agrupa el código fuente de un módulo bajo `src/`.  
+- `RawData` y `ProcData` representan tus carpetas `data/raw` y `data/processed`.  
+- Las flechas muestran el **flujo de datos** y las **dependencias** entre componentes.  
+- `Utils` es un módulo compartido que provee funcionalidades transversales (I/O, logging, configuración).  
+- Finalmente, `DashboardApp` es tu aplicación interactiva (Streamlit, Dash, etc.) que consume los componentes de visualización.
+
