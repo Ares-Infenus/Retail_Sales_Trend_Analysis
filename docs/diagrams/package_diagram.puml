@@ -3,7 +3,7 @@
 skinparam backgroundColor #FFFFFF
 skinparam defaultFontName "Helvetica Neue"
 skinparam defaultFontSize 14
-skinparam roundCorner 10
+skinparam roundCorner 8
 skinparam shadowing false
 
 skinparam packageBackgroundColor #F8F8F8
@@ -13,50 +13,66 @@ skinparam packageFontColor #2C3E50
 skinparam componentBackgroundColor #FFFFFF
 skinparam componentBorderColor #2C3E50
 skinparam componentFontColor #2C3E50
+skinparam componentStyle rectangle
 
 skinparam folderBackgroundColor #ECF0F1
 skinparam folderBorderColor #34495E
 skinparam folderFontColor #2C3E50
 
+' Disposición de izquierda a derecha
+left to right direction
+
 ' Diagrama de Paquetes – Agrupación Lógica de Módulos
 
-package "ETL" as ETL {
-  component "src/ingestion/ingest.py" as Ingest
-  component "src/cleaning/clean.py"   as Clean
-}
-
-package "Analytics" as Analytics {
-  component "src/analysis/eda.py"      as EDA
-  component "src/modeling/forecast.py" as Modeling
-}
-
-package "Visualization" as Visualization {
-  component "src/visualization/plots.py"        as Plots
-  component "dashboards/interactive_dashboard/app.py" as DashboardApp
-}
-
-package "Utils" as Utils {
-  component "src/utils/helpers.py" as Helpers
-}
-
-package "Data" as Data {
+package "Data\n(Almacenamiento)" as Data {
   folder "data/raw/"       as RawData
   folder "data/processed/" as ProcData
 }
 
-' Dependencias entre Paquetes
-RawData    --> Ingest    : Lectura de datos
-Ingest     --> ProcData  : Salida de datos crudos
-ProcData   --> Clean     : Entrada para preprocesamiento
-Clean      --> ProcData  : Datos limpios
-ProcData   --> EDA       : Análisis exploratorio
-EDA        --> Modeling  : Generación de features
-Modeling   --> ProcData  : Salida de predicciones
-EDA        --> Plots     : Estadísticas
-Modeling   --> Plots     : Gráficos de forecast
-Plots      --> DashboardApp : Componentes gráficos
+package "Database\n(PostgreSQL + Docker)" as DB {
+  component "docker-compose.yml" as DockerCompose
+  component "Docker PostgreSQL"    as DockerPostgres
+}
 
-' Relación con Utilidades Compartidas
+package "ETL\n(Ingesta & Limpieza)" as ETL {
+  component "ingest.py" as Ingest
+  component "clean.py"  as Clean
+}
+
+package "Analytics\n(Exploración & Modelado)" as Analytics {
+  component "eda.py"      as EDA
+  component "forecast.py" as Modeling
+}
+
+package "Visualization\n(Reportes & Dashboards)" as Viz {
+  component "plots.py"           as Plots
+  component "app.py"             as DashboardApp
+}
+
+package "Utils\n(Funciones Auxiliares)" as Utils {
+  component "helpers.py" as Helpers
+}
+
+' Conexiones principales – Flujo de datos
+RawData       --> Ingest       : leer datos
+Ingest        --> ProcData     : guardar crudos
+ProcData      --> Clean        : cargar para limpieza
+Clean         --> ProcData     : salida limpia
+ProcData      --> EDA          : cargar para EDA
+EDA           --> Modeling     : generar features
+Modeling      --> ProcData     : predicciones
+EDA           --> Plots        : estadísticas
+Modeling      --> Plots        : resultados de forecast
+Plots         --> DashboardApp : componentes gráficos
+
+' Conexiones con la base de datos
+DockerPostgres --> Ingest    : almacena crudos
+DockerPostgres --> Clean     : almacena limpios
+DockerPostgres --> EDA       : lee datos procesados
+DockerPostgres --> Modeling  : almacena predicciones
+DockerCompose  --> DockerPostgres : configuración contenedor
+
+' Relación con utilidades compartidas
 Helpers <..> Ingest
 Helpers <..> Clean
 Helpers <..> EDA

@@ -12,37 +12,45 @@ skinparam diamondFontColor #2C3E50
 skinparam roundCorner 10
 skinparam shadowing false
 
-|**Fase: Ingesta & EDA**|
-start
-:Recolectar datasets;
-group Exploración de Datos
+group **Fase: Ingesta & EDA**
+  start
+  :Recolectar datasets;
   :Inspeccionar columnas;
   :Detectar valores faltantes;
   :Calcular estadísticas descriptivas;
 end
 
-|**Fase: Preprocesamiento**|
-group Limpieza de Datos
+group **Fase: Preprocesamiento**
   :Imputar valores faltantes;
   :Corregir errores de formato;
   :Eliminar outliers;
 end
 
-|**Fase: Análisis de Tendencias**|
-group Análisis de Series
-  :Visualizar ventas a lo largo del tiempo;
-  :Detectar patrones y estacionalidad;
+group **Fase: Base de Datos (PostgreSQL + Docker)**
+  :Iniciar contenedor Docker con PostgreSQL;
+  :Definir credenciales y volúmenes en docker-compose.yml;
+  :Crear esquema y tablas (ventas, productos, tiendas, promociones);
+  :Cargar CSV a PostgreSQL usando pandas + psycopg2/SQLAlchemy;
 end
 
-|**Fase: Modelado (opcional)**|
-if (¿Incorporar modelado\nde series temporales?) then (Sí)
-  :Aplicar STL, ARIMA o Prophet;
-else (No)
-endif
+group **Fase: Procesamiento & Análisis**
+  :Conectar a PostgreSQL (SQLAlchemy o psycopg2);
+  :Consultar y filtrar datos segmentados;
+  :Análisis de series temporales (visualizar tendencias y estacionalidad);
+  if (¿Incorporar modelado de series temporales?) then (Sí)
+    :Aplicar STL, ARIMA o Prophet;
+  else (No)
+  endif
+end
 
-|**Fase: Entrega de Insights**|
-:Crear dashboard interactivo;
-:Generar recomendaciones estratégicas;
-:Entregar reporte ejecutivo + dashboard;
-stop
+group **Fase: Visualización & Dashboard**
+  :Crear gráficos con Matplotlib / Plotly;
+  :Desarrollar dashboard con Streamlit o Dash;
+end
+
+group **Fase: Entrega de Insights**
+  :Generar recomendaciones estratégicas;
+  :Entregar reporte ejecutivo + dashboard interactivo;
+  stop
+end
 @enduml

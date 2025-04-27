@@ -1,6 +1,6 @@
 @startuml
 '————————————————————————————————————
-' Diagrama de Clases - Retail Sales Analysis
+' Diagrama de Clases - Retail Sales Analysis (con Infraestructura Docker/PostgreSQL)
 ' Nivel: Senior | Estilo: Elegante y Profesional
 '————————————————————————————————————
 
@@ -45,9 +45,8 @@ package "Domain" {
   }
 }
 
-' Asociaciones de Dominio
-Sale "1" --> "1" Product : contains >
-Sale "1" --> "1" Store   : soldAt >
+Sale "1" --> "1" Product    : contains >
+Sale "1" --> "1" Store      : soldAt >
 Sale "0..1" --> "1" Promotion : uses >
 
 ' Paquete de Ingestión
@@ -61,7 +60,7 @@ package "src.ingestion" {
   }
   class DataLoader {
     + loadFromCSV(path: String): DataFrame
-    + loadFromDB(conn: Connection, query: String): DataFrame
+    + loadFromDB(query: String): DataFrame
   }
 }
 DataLoader ..> CSVReader
@@ -147,7 +146,6 @@ package "src.utils" {
     + load(configPath: String): Config
   }
 }
-' Dependencias transversales
 Logger <..> DataLoader
 Logger <..> DataCleaner
 Logger <..> EDAAnalyzer
@@ -155,5 +153,24 @@ Logger <..> ForecastService
 Logger <..> DashboardRenderer
 ConfigManager <..> DataLoader
 ConfigManager <..> ForecastService
+
+' Paquete de Infraestructura
+package "infra" {
+  class DockerCompose {
+    + up(): void
+    + down(): void
+  }
+  class PostgresContainer {
+    - image: String
+    - port: int
+    + start(): void
+    + stop(): void
+    + getConnectionString(): String
+    + applyMigrations(schemaPath: String): void
+  }
+}
+DockerCompose --> PostgresContainer
+DBConnector ..> PostgresContainer
+ConfigManager <..> PostgresContainer
 
 @enduml
