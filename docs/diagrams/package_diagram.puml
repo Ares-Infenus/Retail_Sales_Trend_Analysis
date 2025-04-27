@@ -1,5 +1,5 @@
 @startuml
-' — Parámetros de Estilo para un Look Profesional —
+' — Estilo profesional y organizado —
 skinparam backgroundColor #FFFFFF
 skinparam defaultFontName "Helvetica Neue"
 skinparam defaultFontSize 14
@@ -8,69 +8,93 @@ skinparam shadowing false
 
 skinparam packageBackgroundColor #F8F8F8
 skinparam packageBorderColor #34495E
+skinparam packageBorderThickness 2
 skinparam packageFontColor #2C3E50
+skinparam packageFontSize 16
+skinparam packagePadding 20
 
 skinparam componentBackgroundColor #FFFFFF
 skinparam componentBorderColor #2C3E50
+skinparam componentBorderThickness 1.5
 skinparam componentFontColor #2C3E50
+skinparam componentFontSize 14
+skinparam componentPadding 15
 skinparam componentStyle rectangle
 
 skinparam folderBackgroundColor #ECF0F1
 skinparam folderBorderColor #34495E
+skinparam folderBorderThickness 1.5
 skinparam folderFontColor #2C3E50
 
-' Disposición de izquierda a derecha
-left to right direction
+skinparam nodesep 50
+skinparam ranksep 50
 
-' Diagrama de Paquetes – Agrupación Lógica de Módulos
+skinparam ArrowColor #34495E
+skinparam ArrowFontColor #2C3E50
+skinparam ArrowFontSize 12
+skinparam arrowThickness 1.2
 
+' Layout: top-to-bottom for claridad
+top to bottom direction
+
+' Paquete CI/CD – Integración Continua y Despliegue
+package "CI/CD\n(GitHub Actions)" as CICD {
+  component ".github/workflows/ci.yml" as CIConfig
+}
+
+' Paquete Data – Almacenamiento
 package "Data\n(Almacenamiento)" as Data {
   folder "data/raw/"       as RawData
   folder "data/processed/" as ProcData
 }
 
+' Paquete Database – PostgreSQL + Docker
 package "Database\n(PostgreSQL + Docker)" as DB {
   component "docker-compose.yml" as DockerCompose
   component "Docker PostgreSQL"    as DockerPostgres
 }
 
+' Paquete ETL – Ingesta & Limpieza
 package "ETL\n(Ingesta & Limpieza)" as ETL {
   component "ingest.py" as Ingest
   component "clean.py"  as Clean
 }
 
+' Paquete Analytics – Exploración & Modelado
 package "Analytics\n(Exploración & Modelado)" as Analytics {
   component "eda.py"      as EDA
   component "forecast.py" as Modeling
 }
 
+' Paquete Visualization – Reportes & Dashboards
 package "Visualization\n(Reportes & Dashboards)" as Viz {
   component "plots.py"           as Plots
   component "app.py"             as DashboardApp
 }
 
+' Paquete Utils – Funciones Auxiliares
 package "Utils\n(Funciones Auxiliares)" as Utils {
   component "helpers.py" as Helpers
 }
 
 ' Conexiones principales – Flujo de datos
-RawData       --> Ingest       : leer datos
-Ingest        --> ProcData     : guardar crudos
-ProcData      --> Clean        : cargar para limpieza
-Clean         --> ProcData     : salida limpia
-ProcData      --> EDA          : cargar para EDA
-EDA           --> Modeling     : generar features
-Modeling      --> ProcData     : predicciones
-EDA           --> Plots        : estadísticas
-Modeling      --> Plots        : resultados de forecast
-Plots         --> DashboardApp : componentes gráficos
+RawData --> Ingest : leer datos
+Ingest --> ProcData : guardar crudos
+ProcData --> Clean : cargar para limpieza
+Clean --> ProcData : salida limpia
+ProcData --> EDA : cargar para EDA
+EDA --> Modeling : generar features
+Modeling --> ProcData : predicciones
+EDA --> Plots : estadísticas
+Modeling --> Plots : resultados de forecast
+Plots --> DashboardApp : componentes gráficos
 
 ' Conexiones con la base de datos
-DockerPostgres --> Ingest    : almacena crudos
-DockerPostgres --> Clean     : almacena limpios
-DockerPostgres --> EDA       : lee datos procesados
-DockerPostgres --> Modeling  : almacena predicciones
-DockerCompose  --> DockerPostgres : configuración contenedor
+DockerPostgres --> Ingest : almacena crudos
+DockerPostgres --> Clean : almacena limpios
+DockerPostgres --> EDA : lee datos procesados
+DockerPostgres --> Modeling : almacena predicciones
+DockerCompose --> DockerPostgres : configuración contenedor
 
 ' Relación con utilidades compartidas
 Helpers <..> Ingest
@@ -79,4 +103,12 @@ Helpers <..> EDA
 Helpers <..> Modeling
 Helpers <..> Plots
 Helpers <..> DashboardApp
+
+' Conexiones de CI/CD para lint y tests
+CIConfig --> Ingest : lint/tests
+CIConfig --> Clean : lint/tests
+CIConfig --> EDA : lint/tests
+CIConfig --> Modeling : lint/tests
+CIConfig --> Plots : lint/tests
+CIConfig --> DashboardApp : lint/tests
 @enduml

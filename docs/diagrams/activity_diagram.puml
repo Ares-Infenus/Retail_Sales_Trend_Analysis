@@ -12,8 +12,15 @@ skinparam diamondFontColor #2C3E50
 skinparam roundCorner 10
 skinparam shadowing false
 
-group **Fase: Ingesta & EDA**
+' Fase de CI/CD añadida al inicio
+group **Fase: CI/CD**
   start
+  :Crear archivo `ci.yml` en `.github/workflows`;
+  :Definir tests automatizados (unitarios e integración);
+  :Configurar linting y chequeos de estilo;
+end
+
+group **Fase: Ingesta & EDA**
   :Recolectar datasets;
   :Inspeccionar columnas;
   :Detectar valores faltantes;
@@ -28,7 +35,7 @@ end
 
 group **Fase: Base de Datos (PostgreSQL + Docker)**
   :Iniciar contenedor Docker con PostgreSQL;
-  :Definir credenciales y volúmenes en docker-compose.yml;
+  :Definir credenciales y volúmenes en `docker-compose.yml`;
   :Crear esquema y tablas (ventas, productos, tiendas, promociones);
   :Cargar CSV a PostgreSQL usando pandas + psycopg2/SQLAlchemy;
 end
