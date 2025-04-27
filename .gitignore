@@ -1,0 +1,9 @@
+# No se anexan los datasets al repositorio debido a el peso que representan
+data/raw/holidays_events.csv
+data/raw/items.csv
+data/raw/oil.csv
+data/raw/sample_submission.csv
+data/raw/stores.csv
+data/raw/test.csv
+data/raw/train.csv
+data/raw/transactions.csv
