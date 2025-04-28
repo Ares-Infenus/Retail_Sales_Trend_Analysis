@@ -32,11 +32,11 @@ jobs:
         run: |
           flake8 .
 
-          - name: Run Pytest (if tests exist)
-          run: |
-            if ls tests/test_*.py 1> /dev/null 2>&1; then
-              pytest
-            else
-              echo "No tests to run."
-            fi
+      - name: Run Pytest (if tests exist)
+        run: |
+          if ls tests/test_*.py 1> /dev/null 2>&1; then
+            pytest
+          else
+            echo "No tests to run."
+          fi
         
