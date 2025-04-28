@@ -1,0 +1,17 @@
+# config/config.yaml
+
+database:
+  host:     localhost      # ej. localhost
+  port:     5435              # ej. 5432
+  user:     usuario      # ej. admin
+  password: password  # ej. secret
+  database: Grocery_Sales      # ej. retail_db
+
+paths:
+  log_dir:  data/logs   # donde se escriben los logs
+  data_raw: /data/myapp       # donde van los datos
+  data_proc: /proc/myapp      # donde van los datos procesados
+
+other:
+  log_level:   INFO           # nivel de log por defecto
+  date_format: '%Y-%m-%d'     # formato de fecha global
