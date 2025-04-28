@@ -13,8 +13,10 @@ jobs:
     services:
       db:
         image: timescale/timescaledb:latest-pg17
-        env_file:
-          - .env
+        env:
+          POSTGRES_USER: usuario
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: Grocery_Sales
         volumes:
           - ./data:/var/lib/postgresql/data
         ports:
