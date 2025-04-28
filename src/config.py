@@ -96,8 +96,3 @@ except ConfigError as e:
     # Aquí puedes loguear el error antes de manejarlo
     print(f"Error al cargar la configuración: {e}")
     raise
-
-
-def calcula_area(radio):
-    resultado = 3.1416 * radio**2
-    return None
