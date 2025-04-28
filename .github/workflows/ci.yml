@@ -45,6 +45,16 @@ jobs:
             --enable=W \
             --rcfile=.pylintrc
 
+      - name: Start database via Docker Compose
+        working-directory: infra
+        run: |
+          docker-compose up -d
+          # Esperar a que Postgres acepte conexiones
+          until docker-compose exec db pg_isready -U "${POSTGRES_USER:-postgres}"; do
+            echo "Waiting for database..."
+            sleep 2
+          done
+
       - name: Run Pytest (if tests exist)
         run: |
           if ls test/test_*.py 1> /dev/null 2>&1; then
