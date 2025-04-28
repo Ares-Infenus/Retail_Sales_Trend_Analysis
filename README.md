@@ -1,8 +1,10 @@
+
 # Análisis de Tendencias de Ventas Minoristas
 
 Repositorio para el proyecto **"Análisis de Tendencias de Ventas Minoristas"**, centrado en las primeras fases de ingesta y exploración de datos del dataset real de ventas (Corporación Favorita Grocery Sales Forecasting de Kaggle).
 
 ---
+[![CI Pipeline](https://github.com/Ares-Infenus/Retail_Sales_Trend_Analysis/actions/workflows/ci.yml/badge.svg)](https://github.com/Ares-Infenus/Retail_Sales_Trend_Analysis/actions/workflows/ci.yml)
 
 ## 📋 Tabla de Contenidos
 
