@@ -39,7 +39,7 @@ jobs:
 
       - name: Run Pylint check (strict mode)
         run: |
-          git ls-files '*.py' | xargs pylint \
+          git ls-files '*.py' | xargs -n1 python -m pylint \
             --max-line-length=120 \
             --disable=R,C \
             --enable=W \
@@ -48,12 +48,12 @@ jobs:
       - name: Start database via Docker Compose
         working-directory: infra
         run: |
-          docker-compose up -d
-          # Esperar a que Postgres acepte conexiones
-          until docker-compose exec db pg_isready -U "${POSTGRES_USER:-postgres}"; do
+          docker compose up -d
+          until docker compose exec db pg_isready -U "${POSTGRES_USER:-postgres}"; do
             echo "Waiting for database..."
             sleep 2
           done
+
 
       - name: Run Pytest (if tests exist)
         run: |
