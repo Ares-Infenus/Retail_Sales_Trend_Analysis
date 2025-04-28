@@ -27,7 +27,16 @@ jobs:
       - name: Run Black check
         run: |
           black --check .
-      
+
+      - name: Generate default pylintrc if missing
+        run: |
+          if [ ! -f .pylintrc ]; then
+            pylint --generate-rcfile > .pylintrc
+            echo "Generated default .pylintrc"
+          else
+            echo ".pylintrc already exists, skipping generation"
+          fi
+
       - name: Run Pylint check (strict mode)
         run: |
           pylint --max-line-length=120 --disable=R,C --enable=W --rcfile=.pylintrc .
