@@ -28,6 +28,15 @@ jobs:
         run: |
           black --check .
 
+      - name: Generate default pylintrc if missing
+        run: |
+          if [ ! -f .pylintrc ]; then
+            echo "Generating default .pylintrc"
+            pylint --generate-rcfile > .pylintrc
+          else
+            echo ".pylintrc already exists; skipping generation"
+          fi
+
       - name: Run Pylint check (strict mode)
         run: |
           git ls-files '*.py' | xargs pylint \
