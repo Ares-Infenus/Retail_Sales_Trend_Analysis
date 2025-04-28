@@ -23,8 +23,8 @@ Requiere:
 - `os`: Para manejar rutas de archivos y directorios.
 - `yaml`: Para cargar y leer archivos YAML.
 
-Autor: [Tu Nombre]
-Fecha: [Fecha]
+Autor: Ians Bastian De PinzonZ
+Fecha: 28/04/2025
 """
 
 from typing import Dict, List, Any, Optional

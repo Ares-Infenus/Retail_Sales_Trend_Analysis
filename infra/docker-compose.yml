@@ -1,17 +1,14 @@
 services:
   postgres:
-    # Imagen oficial de TimescaleDB con PostgreSQL 17
     image: timescale/timescaledb:latest-pg17
-    restart: unless-stopped
     env_file:
       - .env
     volumes:
       - ./data:/var/lib/postgresql/data
     ports:
-      # Mapear el puerto 5435 del host al 5432 del contenedor
       - "5435:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
