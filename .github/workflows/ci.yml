@@ -10,6 +10,21 @@ jobs:
   lint-and-test:
     runs-on: ubuntu-latest
 
+    services:
+      db:
+        image: timescale/timescaledb:latest-pg17
+        env_file:
+          - .env
+        volumes:
+          - ./data:/var/lib/postgresql/data
+        ports:
+          - "5435:5432"
+        options: >-
+          --health-cmd "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -39,21 +54,18 @@ jobs:
 
       - name: Run Pylint check (strict mode)
         run: |
-          git ls-files '*.py' | xargs -n1 python -m pylint \
+          git ls-files '*.py' | xargs pylint \
             --max-line-length=120 \
             --disable=R,C \
             --enable=W \
             --rcfile=.pylintrc
 
-      - name: Start database via Docker Compose
-        working-directory: infra
+      - name: Wait for Postgres
         run: |
-          docker compose up -d
-          until docker compose exec db pg_isready -U "${POSTGRES_USER:-postgres}"; do
+          until pg_isready -h localhost -p 5435 -U "${POSTGRES_USER:-postgres}"; do
             echo "Waiting for database..."
             sleep 2
           done
-
 
       - name: Run Pytest (if tests exist)
         run: |
