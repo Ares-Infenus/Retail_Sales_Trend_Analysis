@@ -22,9 +22,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          # Si tienes un requirements.txt, reemplaza las dos líneas siguientes por:
-          # pip install -r requirements.txt
-          pip install black pylint pytest pyyaml
+          pip install black pylint pytest pyyaml python-dotenv psycopg2-binary
 
       - name: Run Black check
         run: |
