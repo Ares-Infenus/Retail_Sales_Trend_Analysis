@@ -1,0 +1,17 @@
+services:
+  postgres:
+    # Usamos la etiqueta "latest" para siempre tirar de la versión más reciente
+    image: postgres:latest
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    ports:
+      # Ahora mapeamos el puerto 5435 del host al 5432 del contenedor
+      - "5435:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
