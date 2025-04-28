@@ -96,3 +96,5 @@ except ConfigError as e:
     # Aquí puedes loguear el error antes de manejarlo
     print(f"Error al cargar la configuración: {e}")
     raise
+
+print("Configuración cargada correctamente.")
