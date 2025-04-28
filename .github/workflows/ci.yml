@@ -22,15 +22,15 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install black flake8 pytest
+          pip install black pylint pytest
 
       - name: Run Black check
         run: |
           black --check .
       
-      - name: Run Flake8 check
+      - name: Run Pylint check (strict mode)
         run: |
-          flake8 .
+          pylint --max-line-length=120 --disable=R,C --enable=W --rcfile=.pylintrc .
 
       - name: Run Pytest (if tests exist)
         run: |
@@ -39,4 +39,3 @@ jobs:
           else
             echo "No tests to run."
           fi
-        
