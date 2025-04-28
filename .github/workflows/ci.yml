@@ -18,7 +18,7 @@ jobs:
           POSTGRES_PASSWORD: password
           POSTGRES_DB:     Grocery_Sales
         volumes:
-          - ${{ github.workspace }}/pgdata:/var/lib/postgresql/data
+          - /tmp/pgdata:/var/lib/postgresql/data
         ports:
           - "5435:5432"
         options: >-
