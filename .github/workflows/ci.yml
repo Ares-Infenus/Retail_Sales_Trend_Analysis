@@ -18,6 +18,7 @@ jobs:
           POSTGRES_USER: usuario
           POSTGRES_PASSWORD: password
           POSTGRES_DB: Grocery_Sales
+        volumes:
           # Persistencia de datos
           - /tmp/pgdata:/var/lib/postgresql/data
           # Montamos tus scripts de migración en el entrypoint
