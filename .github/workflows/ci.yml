@@ -17,10 +17,10 @@ jobs:
           POSTGRES_USER: usuario
           POSTGRES_PASSWORD: password
           POSTGRES_DB: Grocery_Sales
+        # <--- Quitamos el mount de infra/migrations para que Docker no cree
+        #     la carpeta con permisos de root en el workspace
         volumes:
           - /tmp/pgdata:/var/lib/postgresql/data
-          # Montamos la carpeta infra/migrations en el initdb
-          - ${{ github.workspace }}/infra/migrations:/docker-entrypoint-initdb.d
         ports:
           - 5435:5432
         options: >-
@@ -44,8 +44,7 @@ jobs:
           pip install black pylint pytest pyyaml python-dotenv psycopg2-binary
 
       - name: Run Black check
-        run: |
-          black --check .
+        run: black --check .
 
       - name: Generate default pylintrc if missing
         run: |
@@ -81,7 +80,6 @@ jobs:
           PGPASSWORD: password
           PGDATABASE: Grocery_Sales
         run: |
-          # permitimos que un glob sin matches no falle
           shopt -s nullglob
           if compgen -G "infra/migrations/*.sql" > /dev/null; then
             for f in infra/migrations/*.sql; do
