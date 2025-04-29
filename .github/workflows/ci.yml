@@ -13,15 +13,12 @@ jobs:
     services:
       db:
         image: timescale/timescaledb:latest-pg17
-        # Carga tus variables de entorno de forma explícita
         env:
           POSTGRES_USER: usuario
           POSTGRES_PASSWORD: password
           POSTGRES_DB: Grocery_Sales
         volumes:
-          # Persistencia de datos
           - /tmp/pgdata:/var/lib/postgresql/data
-          # Montamos tus scripts de migración en el entrypoint
           - ${{ github.workspace }}/migrations:/docker-entrypoint-initdb.d
         ports:
           - 5435:5432
@@ -72,6 +69,16 @@ jobs:
             echo "Waiting for database..."
             sleep 2
           done
+
+      - name: Verify schema applied
+        env:
+          PGPASSWORD: password
+        run: |
+          echo "Tablas en la base de datos 'Grocery_Sales':"
+          psql -h localhost -p 5435 \
+               -U "usuario" \
+               -d "Grocery_Sales" \
+               -c "\dt"
 
       - name: Run Pytest (if tests exist)
         run: |
