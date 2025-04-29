@@ -8,4 +8,3 @@ data/raw/test.csv
 data/raw/train.csv
 data/raw/transactions.csv
 infra/data
-src/ingestion
