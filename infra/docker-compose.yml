@@ -5,6 +5,7 @@ services:
       - .env
     volumes:
       - ./data:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d   # ← montas tus scripts aquí
     ports:
       - "5435:5432"
     healthcheck:

@@ -140,4 +140,4 @@ CREATE INDEX IF NOT EXISTS idx_holidays_locale
 
 \echo '-> Script completado exitosamente'
 
-ROLLBACK; -- Cambiar a COMMIT; para aplicar cambios
+COMMIT; -- Cambiar a COMMIT; para aplicar cambios
