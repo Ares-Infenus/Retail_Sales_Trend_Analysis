@@ -2,99 +2,88 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
-  lint-and-test:
+  lint-test-migrate:
     runs-on: ubuntu-latest
-
     services:
-      db:
+      postgres:
         image: timescale/timescaledb:latest-pg17
         env:
           POSTGRES_USER: usuario
           POSTGRES_PASSWORD: password
           POSTGRES_DB: Grocery_Sales
-        # <--- Quitamos el mount de infra/migrations para que Docker no cree
-        #     la carpeta con permisos de root en el workspace
-        volumes:
-          - /tmp/pgdata:/var/lib/postgresql/data
         ports:
           - 5435:5432
         options: >-
-          --health-cmd "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          --health-cmd="pg_isready -U $${{ env.POSTGRES_USER }} -d $${{ env.POSTGRES_DB }}"
+          --health-interval=10s --health-timeout=5s --health-retries=5
+
+    env:
+      PGHOST: localhost
+      PGPORT: 5435
+      PGUSER: usuario
+      PGPASSWORD: password
+      PGDATABASE: Grocery_Sales
 
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Python
+      - name: Set up Python 3.8
         uses: actions/setup-python@v4
         with:
-          python-version: "3.8"
+          python-version: 3.8
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install black pylint pytest pyyaml python-dotenv psycopg2-binary
-
-      - name: Run Black check
-        run: black --check .
-
-      - name: Generate default pylintrc if missing
-        run: |
-          if [ ! -f .pylintrc ]; then
-            pylint --generate-rcfile > .pylintrc
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          else
+            pip install black pylint pytest python-dotenv psycopg2-binary
           fi
 
-      - name: Run Pylint check (strict mode)
+      - name: Lint with Black & Pylint
         run: |
-          git ls-files '*.py' | xargs pylint \
-            --max-line-length=120 \
-            --disable=R,C \
-            --enable=W \
-            --rcfile=.pylintrc
+          black --check .
+          pylint --exit-zero --disable=R,C --max-line-length=120 $(git ls-files '*.py')
 
-      - name: Wait for Postgres
+      - name: Wait for Postgres to be ready
         run: |
-          until pg_isready -h localhost -p 5435 -U usuario -d Grocery_Sales; do
-            echo "Waiting for database..."
+          until pg_isready -h $PGHOST -p $PGPORT -U $PGUSER -d $PGDATABASE; do
+            echo "Waiting for Postgres..."
             sleep 2
           done
 
-      - name: Listar migraciones disponibles
-        run: |
-          echo "Contenido de infra/migrations:"
-          ls -l infra/migrations/ || echo "⚠️ No existe infra/migrations/ en el repo."
-
-      - name: Run SQL migrations and show output
-        env:
-          PGHOST: localhost
-          PGPORT: 5435
-          PGUSER: usuario
-          PGPASSWORD: password
-          PGDATABASE: Grocery_Sales
+      - name: Apply SQL migrations
         run: |
           shopt -s nullglob
-          if compgen -G "infra/migrations/*.sql" > /dev/null; then
-            for f in infra/migrations/*.sql; do
-              echo "⏳ Ejecutando $f..."
+          files=(infra/migrations/*.sql)
+          if ((${#files[@]})); then
+            for f in "${files[@]}"; do
+              echo "⏳ Applying $f"
               psql --echo-all --set ON_ERROR_STOP=on -f "$f"
-              echo "✅ $f aplicado correctamente."
             done
           else
-            echo "⚠️ No se encontraron scripts SQL en infra/migrations/; omitiendo paso."
+            echo "⚠️ No migration scripts found, skipping."
           fi
 
-      - name: Run Pytest (if tests exist)
+      - name: Run tests
         run: |
-          if ls test/test_*.py 1> /dev/null 2>&1; then
-            pytest
+          if compgen -G "test/test_*.py" > /dev/null; then
+            pytest --maxfail=1 --disable-warnings -q
           else
             echo "No tests to run."
           fi
