@@ -15,10 +15,9 @@ jobs:
         image: timescale/timescaledb:latest-pg17
         # Carga tus variables de entorno de forma explícita
         env:
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-        volumes:
+          POSTGRES_USER: usuario
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: Grocery_Sales
           # Persistencia de datos
           - /tmp/pgdata:/var/lib/postgresql/data
           # Montamos tus scripts de migración en el entrypoint
