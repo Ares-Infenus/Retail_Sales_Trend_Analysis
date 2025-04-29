@@ -32,11 +32,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Clean pgdata
-        run: |
-          sudo rm -rf /tmp/pgdata
-          mkdir /tmp/pgdata
-
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -75,15 +70,22 @@ jobs:
             sleep 2
           done
 
-      - name: Verify schema applied
+      - name: Run SQL migrations and show output
         env:
+          PGHOST: localhost
+          PGPORT: 5435
+          PGUSER: usuario
           PGPASSWORD: password
+          PGDATABASE: Grocery_Sales
         run: |
-          echo "Tablas en la base de datos 'Grocery_Sales':"
-          psql -h localhost -p 5435 \
-               -U "usuario" \
-               -d "Grocery_Sales" \
-               -c "\dt"
+          for f in migrations/*.sql; do
+            echo "⏳ Ejecutando $f..."
+            psql \
+              --echo-all \
+              --set ON_ERROR_STOP=on \
+              -f "$f"
+            echo "✅ $f aplicado correctamente."
+          done
 
       - name: Run Pytest (if tests exist)
         run: |
