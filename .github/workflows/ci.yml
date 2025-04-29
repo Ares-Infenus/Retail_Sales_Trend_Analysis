@@ -32,6 +32,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Clean pgdata
+        run: |
+          sudo rm -rf /tmp/pgdata
+          mkdir /tmp/pgdata
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
