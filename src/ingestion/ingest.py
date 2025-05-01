@@ -136,6 +136,7 @@ class HolidaysSchema(pa.DataFrameModel):  # pylint: disable=too-few-public-metho
     date: Series[pd.Timestamp]
     type: Series[str]
     locale: Series[str]
+    locale_name: Series[str]
     description: Series[str]
     transferred: Series[bool]
 

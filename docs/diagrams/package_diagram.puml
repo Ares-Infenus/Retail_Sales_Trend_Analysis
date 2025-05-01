@@ -1,114 +1,61 @@
 @startuml
-' — Estilo profesional y organizado —
-skinparam backgroundColor #FFFFFF
-skinparam defaultFontName "Helvetica Neue"
-skinparam defaultFontSize 14
-skinparam roundCorner 8
-skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam linetype ortho
 
-skinparam packageBackgroundColor #F8F8F8
-skinparam packageBorderColor #34495E
-skinparam packageBorderThickness 2
-skinparam packageFontColor #2C3E50
-skinparam packageFontSize 16
-skinparam packagePadding 20
+package "project-root" {
+  package data {
+    component "raw/" as raw_folder
+    component "processed/" as processed_folder
+  }
 
-skinparam componentBackgroundColor #FFFFFF
-skinparam componentBorderColor #2C3E50
-skinparam componentBorderThickness 1.5
-skinparam componentFontColor #2C3E50
-skinparam componentFontSize 14
-skinparam componentPadding 15
-skinparam componentStyle rectangle
+  package config {
+    component ".env" as env_file
+    component "config.yaml" as config_yaml
+  }
 
-skinparam folderBackgroundColor #ECF0F1
-skinparam folderBorderColor #34495E
-skinparam folderBorderThickness 1.5
-skinparam folderFontColor #2C3E50
+  package orchestrator {
+    component "config.py" as orchestrator_script
+  }
 
-skinparam nodesep 50
-skinparam ranksep 50
+  package scripts {
+    component "ingest.py" as ingest_script
+  }
 
-skinparam ArrowColor #34495E
-skinparam ArrowFontColor #2C3E50
-skinparam ArrowFontSize 12
-skinparam arrowThickness 1.2
+  package notebooks {
+    component "01_EDA.ipynb" as eda1
+    component "02_Cleaning.ipynb" as cleaning
+    component "03_EDA_Profundo.ipynb" as eda2
+    component "04_Trend_Analysis.ipynb" as trend
+  }
 
-' Layout: top-to-bottom for claridad
-top to bottom direction
+  package ml_models {
+    component "training.py" as training
+    component "optuna_study.py" as optuna
+  }
 
-' Paquete CI/CD – Integración Continua y Despliegue
-package "CI/CD\n(GitHub Actions)" as CICD {
-  component ".github/workflows/ci.yml" as CIConfig
+  package docker {
+    component "docker-compose.yml" as compose_file
+    component "init_db.sql" as initdb
+  }
+
+  package ci_cd {
+    component "ci.yml" as cicd
+  }
+
+  package reports {
+    component "executive_report.pbix" as report_pbix
+    component "dashboard.twbx" as dashboard
+  }
+
+  package tests {
+    component "test_ingest.py" as test_ingest
+    component "test_db.py" as test_db
+    component "test_dashboard.py" as test_dashboard
+    component "test_report.py" as test_report
+  }
 }
 
-' Paquete Data – Almacenamiento
-package "Data\n(Almacenamiento)" as Data {
-  folder "data/raw/"       as RawData
-  folder "data/processed/" as ProcData
-}
+// Representación de la base de datos como cilindro según la documentación de PlantUML
+database timescaledb as "TimescaleDB + PostgreSQL"
 
-' Paquete Database – PostgreSQL + Docker
-package "Database\n(PostgreSQL + Docker)" as DB {
-  component "docker-compose.yml" as DockerCompose
-  component "Docker PostgreSQL"    as DockerPostgres
-}
-
-' Paquete ETL – Ingesta & Limpieza
-package "ETL\n(Ingesta & Limpieza)" as ETL {
-  component "ingest.py" as Ingest
-  component "clean.py"  as Clean
-}
-
-' Paquete Analytics – Exploración & Modelado
-package "Analytics\n(Exploración & Modelado)" as Analytics {
-  component "eda.py"      as EDA
-  component "forecast.py" as Modeling
-}
-
-' Paquete Visualization – Reportes & Dashboards
-package "Visualization\n(Reportes & Dashboards)" as Viz {
-  component "plots.py"           as Plots
-  component "app.py"             as DashboardApp
-}
-
-' Paquete Utils – Funciones Auxiliares
-package "Utils\n(Funciones Auxiliares)" as Utils {
-  component "helpers.py" as Helpers
-}
-
-' Conexiones principales – Flujo de datos
-RawData --> Ingest : leer datos
-Ingest --> ProcData : guardar crudos
-ProcData --> Clean : cargar para limpieza
-Clean --> ProcData : salida limpia
-ProcData --> EDA : cargar para EDA
-EDA --> Modeling : generar features
-Modeling --> ProcData : predicciones
-EDA --> Plots : estadísticas
-Modeling --> Plots : resultados de forecast
-Plots --> DashboardApp : componentes gráficos
-
-' Conexiones con la base de datos
-DockerPostgres --> Ingest : almacena crudos
-DockerPostgres --> Clean : almacena limpios
-DockerPostgres --> EDA : lee datos procesados
-DockerPostgres --> Modeling : almacena predicciones
-DockerCompose --> DockerPostgres : configuración contenedor
-
-' Relación con utilidades compartidas
-Helpers <..> Ingest
-Helpers <..> Clean
-Helpers <..> EDA
-Helpers <..> Modeling
-Helpers <..> Plots
-Helpers <..> DashboardApp
-
-' Conexiones de CI/CD para lint y tests
-CIConfig --> Ingest : lint/tests
-CIConfig --> Clean : lint/tests
-CIConfig --> EDA : lint/tests
-CIConfig --> Modeling : lint/tests
-CIConfig --> Plots : lint/tests
-CIConfig --> DashboardApp : lint/tests
 @enduml

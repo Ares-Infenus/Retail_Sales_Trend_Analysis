@@ -52,6 +52,7 @@ CREATE TABLE IF NOT EXISTS favorita.holidays_events (
   date        DATE    NOT NULL,
   type        VARCHAR NOT NULL,
   locale      VARCHAR NOT NULL,
+  locale_name VARCHAR NOT NULL,
   description VARCHAR,
   transferred BOOLEAN,
   PRIMARY KEY (date, type, locale)
