@@ -1,0 +1,9 @@
+black
+pylint
+pytest
+pyyaml
+python-dotenv
+psycopg2-binary
+numpy
+pandas
+matplotlib

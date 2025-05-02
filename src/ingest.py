@@ -1,15 +1,13 @@
 """
 Module: ingestion_pipeline.py
 Description: Chunked ingestion of CSV/Parquet data into a PostgreSQL database with
-Pandera validation.
+Pandera validation using credentials from config.py.
 """
 
-import os
 import sys
 import logging
-
 from typing import Iterator, Optional
-from dotenv import load_dotenv  # pylint: disable=all
+
 import pandas as pd
 import pandera as pa
 from pandera.typing import Series
@@ -17,16 +15,22 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
 
-# Constants
-dotenv_path = os.path.join("infra", ".env")
-load_dotenv(dotenv_path, override=True)
+from config import config
 
-DB_URL: str = os.getenv("DB_URL") or (
-    f"postgresql+psycopg2://{os.getenv('POSTGRES_USER')}"
-    f":{os.getenv('POSTGRES_PASSWORD')}@{os.getenv('POSTGRES_HOST')}"
-    f":{os.getenv('POSTGRES_PORT')}/{os.getenv('POSTGRES_DB')}"
-)
+# Load database configuration
+try:
+    db_cfg = config["database"]
+    host = db_cfg["host"]
+    port = db_cfg["port"]
+    user = db_cfg["user"]
+    password = db_cfg["password"]
+    database = db_cfg["database"]
+except KeyError as exc:
+    logging.error("Missing database configuration key: %s", exc)
+    sys.exit(1)
 
+# Construct the database URL
+DB_URL: str = f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{database}"
 
 # Configure logging
 logging.basicConfig(
