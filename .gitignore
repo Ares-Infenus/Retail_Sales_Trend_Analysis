@@ -8,3 +8,7 @@ data/raw/test.csv
 data/raw/train.csv
 data/raw/transactions.csv
 infra/data
+data/processed/parted_train
+data/processed/clear_oil_raw_Dukascopy.csv
+data/processed/clear_train.csv
+data/raw/oil_raw_Dukascopy.csv
