@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS favorita.holidays_events (
   locale_name VARCHAR NOT NULL,
   description VARCHAR,
   transferred BOOLEAN,
-  PRIMARY KEY (date, type, locale)
+  PRIMARY KEY (date, type, locale, description)
 );
 
 \echo '-> Creando tabla sample_submission'

@@ -164,6 +164,7 @@ class SampleSubmissionSchema(
 class TrainSchema(pa.DataFrameModel):  # pylint: disable=too-few-public-methods
     """Pandera schema for the 'train' table."""
 
+    id: Series[int]
     date: Series[pd.Timestamp]
     store_nbr: Series[int]
     item_nbr: Series[int]
@@ -178,6 +179,7 @@ class TrainSchema(pa.DataFrameModel):  # pylint: disable=too-few-public-methods
 class TestSchema(pa.DataFrameModel):  # pylint: disable=too-few-public-methods
     """Pandera schema for the 'test' table."""
 
+    id: Series[int]
     date: Series[pd.Timestamp]
     store_nbr: Series[int]
     item_nbr: Series[int]
@@ -255,7 +257,7 @@ def insert_chunk(
         raise
 
 
-def run(file_path: str, table_name: str, chunk_size: int = 10_000) -> None:
+def run(file_path: str, table_name: str, chunk_size: int = 20_000) -> None:
     """
     Execute the ingestion pipeline: read, validate, and insert data in chunks.
 
@@ -298,7 +300,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--chunk_size",
         type=int,
-        default=10_000,
+        default=20_000,
         help="Number of rows to process per chunk.",
     )
     args = parser.parse_args()
