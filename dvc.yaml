@@ -1,0 +1,7 @@
+stages:
+  unzip_data:
+    cmd: powershell Expand-Archive -Path data.zip -DestinationPath data
+    deps:
+    - data.zip
+    outs:
+    - data
