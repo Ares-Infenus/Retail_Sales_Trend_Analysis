@@ -1,0 +1,6 @@
+[core]
+    remote = gdrive_remote
+['remote "gdrive_remote"']
+    url = gdrive://1Q6Nk2zhYQeOH_TSuZyrqMzL2GSC_EFD2
+    gdrive_use_service_account = true
+    gdrive_service_account_json_file_path = D:\Portafolio oficial\Retail Sales Trend Analysis\dvc-proyect-favorita.json
