@@ -82,14 +82,13 @@ def test_tables_exist(conn, table):
 
 def test_hypertable_train(conn):
     cur = conn.cursor()
-    # Timescale guarda hypertables en _timescaledb_catalog.hypertable
     cur.execute(
         """
         SELECT EXISTS (
-          SELECT 1 FROM _timescaledb_catalog.hypertable h
-           JOIN pg_class c ON c.oid=h.owner_table
-           JOIN pg_namespace n ON n.oid=c.relnamespace
-           WHERE n.nspname='favorita' AND c.relname='train'
+          SELECT 1
+            FROM _timescaledb_catalog.hypertable h
+           WHERE h.schema_name = 'favorita'
+             AND h.table_name  = 'train'
         );
     """
     )
