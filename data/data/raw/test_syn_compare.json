@@ -1,0 +1,33 @@
+{
+  "date": {
+    "sim_ks": 0.0625,
+    "sim_nan": 1.0,
+    "sim_inf": 1.0,
+    "data_type": "string",
+    "sim_pct": null
+  },
+  "id": {
+    "sim_nan": 1.0,
+    "sim_inf": 1.0,
+    "sim_pct": 0.9870316490422211,
+    "data_type": "numeric"
+  },
+  "store_nbr": {
+    "sim_nan": 1.0,
+    "sim_inf": 1.0,
+    "sim_pct": 0.4220975409135981,
+    "data_type": "numeric"
+  },
+  "item_nbr": {
+    "sim_nan": 1.0,
+    "sim_inf": 1.0,
+    "sim_pct": 0.9926287623170376,
+    "data_type": "numeric"
+  },
+  "onpromotion": {
+    "sim_nan": 1.0,
+    "sim_inf": 1.0,
+    "sim_pct": -4.333333333333333,
+    "data_type": "boolean"
+  }
+}

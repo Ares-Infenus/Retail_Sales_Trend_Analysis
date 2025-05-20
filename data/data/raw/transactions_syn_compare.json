@@ -1,0 +1,21 @@
+{
+  "date": {
+    "sim_ks": 0.9963201533154465,
+    "sim_nan": 1.0,
+    "sim_inf": 1.0,
+    "data_type": "string",
+    "sim_pct": null
+  },
+  "store_nbr": {
+    "sim_nan": 1.0,
+    "sim_inf": 1.0,
+    "sim_pct": 1.0,
+    "data_type": "numeric"
+  },
+  "transactions": {
+    "sim_nan": 1.0,
+    "sim_inf": 1.0,
+    "sim_pct": 0.9988701629435419,
+    "data_type": "numeric"
+  }
+}

@@ -1,6 +1,15 @@
 # No se anexan los datasets al repositorio debido a el peso que representan
-data
 infra/data
 data.zip
 /data_sql.zip
 dvc-proyect-favorita.json
+data/data/raw/holidays_events.csv
+data/data/raw/items.csv
+data/data/raw/oil_raw_Dukascopy.csv
+data/data/raw/oil.csv
+data/data/raw/sample_submission.csv
+data/data/raw/stores.csv
+data/data/raw/test.csv
+data/data/raw/train.csv
+data/data/raw/transactions.csv
+data/data/processed
