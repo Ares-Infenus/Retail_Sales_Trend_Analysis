@@ -7,83 +7,24 @@ on:
     branches: [main]
 
 jobs:
-  lint-test-migrate:
+  base-setup:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: timescale/timescaledb:latest-pg17
-        env:
-          POSTGRES_USER: usuario
-          POSTGRES_PASSWORD: password
-          POSTGRES_DB: Grocery_Sales
-        ports:
-          - 5435:5432
-        options: >-
-          --health-cmd "pg_isready -U usuario -d Grocery_Sales"
-          --health-interval=10s --health-timeout=5s --health-retries=5
-
-    env:
-      PGHOST: localhost
-      PGPORT: 5435
-      PGUSER: usuario
-      PGPASSWORD: password
-      PGDATABASE: Grocery_Sales
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Python 3.8
+      - name: Set up Python 3.12.7
         uses: actions/setup-python@v4
         with:
-          python-version: 3.8
-
-      - name: Cache pip dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+          python-version: '3.12.7'
 
       - name: Install dependencies
         run: |
-          pip install --upgrade pip
-          if [ -f requirements.txt ]; then
-            pip install -r requirements.txt
+          python -m pip install --upgrade pip
+          if [ -f environment.txt ]; then
+            pip install -r environment.txt
           else
-            pip install black pylint pytest pyyaml python-dotenv psycopg2-binary
-          fi
-
-      - name: Lint with Black & Pylint
-        run: |
-          black --check .
-          pylint --exit-zero --disable=R,C --max-line-length=120 $(git ls-files '*.py')
-
-      - name: Wait for Postgres to be ready
-        run: |
-          until pg_isready -h $PGHOST -p $PGPORT -U $PGUSER -d $PGDATABASE; do
-            echo "Waiting for Postgres..."
-            sleep 2
-          done
-
-      - name: Apply SQL migrations
-        run: |
-          shopt -s nullglob
-          files=(infra/migrations/*.sql)
-          if ((${#files[@]})); then
-            for f in "${files[@]}"; do
-              echo "⏳ Applying $f"
-              psql --echo-all --set ON_ERROR_STOP=on -f "$f"
-            done
-          else
-            echo "⚠️ No migration scripts found, skipping."
-          fi
-
-      - name: Run tests
-        run: |
-          if compgen -G "test/test_*.py" > /dev/null; then
-            pytest --maxfail=1 --disable-warnings -q
-          else
-            echo "No tests to run."
+            echo "❌ No se encontró environment.txt"
+            exit 1
           fi
