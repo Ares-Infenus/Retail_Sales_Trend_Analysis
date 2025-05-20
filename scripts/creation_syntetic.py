@@ -1,24 +1,73 @@
-import os
-import sys
+"""
+creation_syntetic.py
+
+Este módulo implementa un pipeline robusto y paralelizable para la generación de
+muestras sintéticas a partir de archivos CSV de gran tamaño. El objetivo principal
+es reducir la carga de datos, permitiendo trabajar con subconjuntos representativos
+de grandes volúmenes de información manteniendo las estadísticas fundamentales de
+las variables originales.
+
+Funcionalidades principales:
+----------------------------
+- Descubrimiento automático de archivos `.csv` dentro de un directorio especificado.
+- Lectura eficiente por fragmentos (`chunks`) para minimizar el uso de memoria.
+- Muestreo aleatorio sin reemplazo con control de reproducibilidad.
+- Recolección y resumen de estadísticas por tipo de columna (numéricas, categóricas, fechas).
+- Detección y manejo de valores especiales como NaN e infinitos.
+- Comparación estadística entre el conjunto original y el muestreado utilizando la prueba de Kolmogorov-Smirnov y otras métricas de similitud.
+- Registro exhaustivo de eventos, advertencias y errores mediante `logging`.
+
+Estructura del módulo:
+----------------------
+- **Funciones utilitarias**: gestión de memoria, detección de archivos, apertura segura de archivos, cálculo de núcleos disponibles.
+- **ChunkSampler**: clase responsable del muestreo incremental por fragmento.
+- **StatsCollector**: clase que acumula estadísticas a lo largo de los fragmentos procesados.
+- **SyntheticSampler**: clase principal que coordina el proceso de lectura, muestreo, estadística y guardado.
+- **compare_distributions**: función que contrasta distribuciones originales vs sintéticas para validar la calidad de la muestra.
+- **main()**: punto de entrada para ejecutar el pipeline completo en un directorio.
+
+Dependencias:
+-------------
+- pandas, numpy, scipy, tqdm, psutil (opcional), logging
+
+Uso:
+----
+Este script está diseñado para ejecutarse como módulo principal (`__main__`) apuntando a un
+directorio con archivos CSV:
+
+    python creation_syntetic.py
+
+Se recomienda ajustar la constante `DATA_FOLDER` en la sección final del script o integrarlo
+dentro de una solución más amplia para procesamiento por lotes.
+
+Autor: Sebastian David Pinzon Zambrano.
+------
+Desarrollado como parte de un sistema automatizado de muestreo sintético para análisis de grandes volúmenes de datos en entornos con recursos limitados.
+"""
+
 import glob
-import warnings
-from logging.handlers import RotatingFileHandler
+import json
 import logging
 import multiprocessing as mp  # type: ignore
-from typing import Any, Dict, List, Optional, Union, TypedDict
+import os
 import shutil
-import json
-import pandas as pd
+import sys
+import warnings
+from logging.handlers import RotatingFileHandler
+from typing import Any, Dict, List, Optional, TypedDict, Union
+
 import numpy as np
-from tqdm import tqdm
-from scipy.stats import ks_2samp
+import pandas as pd
+from numpy.typing import NDArray
 from pandas.api.types import (
-    is_bool_dtype,
-    is_categorical_dtype,
-    is_datetime64_any_dtype,
-    is_numeric_dtype,
-    is_object_dtype,
+    is_bool_dtype,  # type: ignore
+    is_categorical_dtype,  # type: ignore
+    is_datetime64_any_dtype,  # type: ignore
+    is_numeric_dtype,  # type: ignore
+    is_object_dtype,  # type: ignore
 )
+from scipy.stats import ks_2samp
+from tqdm import tqdm
 
 
 class NumericStats(TypedDict):
@@ -27,7 +76,8 @@ class NumericStats(TypedDict):
 
     Atributos:
         sum (float): Suma acumulada de los valores.
-        sum2 (float): Suma acumulada de los cuadrados de los valores (útil para calcular la varianza).
+        sum2 (float): Suma acumulada de los cuadrados de los valores (útil para
+        calcular la varianza).
         count (int): Cantidad de elementos acumulados.
         values (List[np.ndarray]): Lista de arrays NumPy con los valores individuales registrados.
             Puede ser un solo np.ndarray si se prefiere esa representación.
@@ -36,7 +86,7 @@ class NumericStats(TypedDict):
     sum: float
     sum2: float
     count: int
-    values: List[np.ndarray]  # o np.ndarray si es solo uno
+    values: List[np.ndarray]  # o np.ndarray si es solo uno # type: ignore
 
 
 try:
@@ -50,16 +100,30 @@ warnings.filterwarnings("once", message="Mean of empty slice")
 
 # -------------------- Logging Setup --------------------
 def setup_logger(log_path: Optional[str] = None) -> logging.Logger:
-    logger = logging.getLogger("synthetic_sampler")
-    logger.setLevel(logging.DEBUG)  # Capturamos todo, filtramos por handler
+    """
+    Configura un logger con salida a consola y, opcionalmente, a un archivo rotativo.
 
-    # 1) Consola: WARNING en adelante
+    El logger se llama "synthetic_sampler" y está configurado con los siguientes handlers:
+    - Consola (`stdout`): Nivel WARNING o superior.
+    - Archivo rotativo (si se proporciona `log_path`): Nivel INFO o superior, incluyendo DEBUG.
+
+    Args:
+        log_path (Optional[str]): Ruta al archivo de log. Si se proporciona, se escribe allí
+                                con rotación de hasta 3 archivos de 5MB cada uno.
+
+    Returns:
+        logging.Logger: Instancia del logger configurado.
+    """
+    logger = logging.getLogger("synthetic_sampler")  # type: ignore
+    logger.setLevel(logging.DEBUG)  # Captura todo, los handlers filtran por nivel
+
+    # Handler de consola: muestra WARNING o superior
     ch = logging.StreamHandler(sys.stdout)
     ch.setLevel(logging.WARNING)
     ch.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(message)s"))
     logger.addHandler(ch)
 
-    # 2) Archivo rotativo: INFO y DEBUG
+    # Handler de archivo rotativo: guarda INFO y DEBUG si se proporciona log_path
     if log_path:
         fh = RotatingFileHandler(log_path, maxBytes=5 * 1024 * 1024, backupCount=3)
         fh.setLevel(logging.INFO)
@@ -152,14 +216,14 @@ def safe_open_file(path: str, mode: str = "r") -> None:
     """
     try:
         with open(path, mode):
-            pass  # File is accessible
-    except FileNotFoundError as e:
+            pass
+    except FileNotFoundError:
         logger.error("File not found: %s", path, exc_info=True)
         raise
-    except PermissionError as e:
+    except PermissionError:
         logger.error("Permission denied: %s", path, exc_info=True)
         raise
-    except OSError as e:
+    except OSError:
         logger.error("I/O error on file: %s", path, exc_info=True)
         raise
 
@@ -303,16 +367,16 @@ class StatsCollector:
         special_values (Dict[str, Dict[str, Any]]): Conteo de valores especiales (NaN, Inf, total).
     """
 
-    def __init__(self, logger: logging.Logger) -> None:
+    def __init__(self, log: logging.Logger) -> None:
         """
         Inicializa la clase StatsCollector con un logger.
 
         Args:
             logger (logging.Logger): Objeto logger para registrar errores o advertencias.
         """
-        self.logger = logger
+        self.logger = log
         self.numeric_stats: Dict[
-            str, Dict[str, Union[int, float, List[np.ndarray]]]
+            str, Dict[str, Union[int, float, List[NDArray[Any]]]]
         ] = {}
         self.categorical_stats: Dict[str, Dict[Any, float]] = {}
         self.special_values: Dict[str, Dict[str, int]] = {}
@@ -329,9 +393,11 @@ class StatsCollector:
         Args:
             chunk (pd.DataFrame): Un DataFrame que contiene las columnas a analizar.
         """
-        for col in chunk.columns:  # type: str
+        for col in chunk.columns:  # type: ignore
             # anotar tipo de col_raw para Pylance
+            # pylint: disable=unsubscriptable-object
             col_raw: pd.Series[Any] = chunk[col]
+            # pylint: enable=unsubscriptable-object
             try:
                 # —————————— DATETIME ——————————
                 if is_datetime64_any_dtype(col_raw):
@@ -685,6 +751,21 @@ class SyntheticSampler:
 
 
 def process_file_worker(args):
+    """
+    Worker para procesar un archivo utilizando un objeto SyntheticSampler.
+
+    Esta función se diseña para ejecutarse en un pool de procesos. Recibe como argumento
+    una instancia de SyntheticSampler, invoca su método `process` y captura cualquier
+    excepción que ocurra durante la ejecución.
+
+    Args:
+        args (SyntheticSampler): Instancia de SyntheticSampler que contiene la lógica
+            y los parámetros necesarios para procesar un archivo CSV.
+
+    Returns:
+        bool: Devuelve True si `sampler.process()` finaliza correctamente, o False
+            si ocurre cualquier error durante el procesamiento.
+    """
     sampler: SyntheticSampler = args
     try:
         return sampler.process()
@@ -699,6 +780,28 @@ def main(
     target_rows: int = 50_000,
     logger: logging.Logger = logger,
 ):
+    """
+    Punto de entrada principal del pipeline de muestreo sintético.
+
+    Este método realiza los siguientes pasos:
+      1. Descubre archivos CSV en el directorio proporcionado.
+      2. Calcula la memoria libre disponible y muestra información de inicio.
+      3. Crea un pool de procesos para paralelizar el procesamiento (si es posible).
+      4. Inicializa instancias de `SyntheticSampler` para cada archivo.
+      5. Ejecuta el muestreo en paralelo (o secuencialmente si el pool falla).
+      6. Muestra una barra de progreso y acumula resultados.
+      7. Registra el resumen final de archivos procesados exitosamente.
+
+    Args:
+        data_folder (str): Ruta al directorio donde buscar archivos CSV.
+        target_rows (int, opcional): Número de filas objetivo para cada muestra sintética.
+            Por defecto 50_000.
+        logger (logging.Logger, opcional): Logger para registrar eventos, advertencias y errores.
+            Por defecto, el logger configurado globalmente.
+
+    Returns:
+        None: Este método no retorna valor; en caso de error crítico, lo registra en el logger.
+    """
     try:
         files = discover_csv_files(data_folder)
         free_mem = get_free_memory_mb()
@@ -858,7 +961,7 @@ def compare_distributions(
 # Función de inferencia de tipos por columna (solo primeras n filas)
 def infer_column_types(orig_path: str, sample_rows: int = 1000) -> Dict[str, str]:
     """Detecta data_type en {datetime, boolean, numeric, string} leyendo un muestreo."""
-    df_sample = pd.read_csv(
+    df_sample: pd.DataFrame = pd.read_csv(  # type: ignore
         orig_path,
         nrows=sample_rows,
         low_memory=False,
