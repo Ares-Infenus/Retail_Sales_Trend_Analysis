@@ -1,3 +1,52 @@
+"""
+PostgreSQL TimescaleDB Schema and Object Validation Tests
+==========================================================
+
+This module defines a suite of integration tests designed to validate the structure and configuration
+of a PostgreSQL database enhanced with the TimescaleDB extension. It is intended for use with `pytest`
+and leverages `psycopg2` for database interaction.
+
+The tests verify the following:
+- The TimescaleDB extension is enabled.
+- The presence of a specific schema (`favorita`).
+- The existence of key tables within the `favorita` schema.
+- That critical tables (`train` and `test`) are registered as hypertables.
+- The presence of relevant indexes for optimized query performance.
+
+Environment:
+------------
+- The database connection is established via the `DB_DSN` environment variable.
+  If unset, it defaults to: `postgresql://postgres:postgres@localhost:5432/postgres`.
+
+Fixtures:
+---------
+- `conn()`: Provides a module-scoped PostgreSQL connection with autocommit enabled.
+
+Helper Functions:
+-----------------
+- `table_exists(cur, schema, table)`: Returns True if the specified table exists in the given schema.
+- `index_exists(cur, index_name)`: Returns True if the specified index exists.
+
+Test Cases:
+-----------
+- `test_extension_timescaledb`: Asserts that the TimescaleDB extension is enabled.
+- `test_schema_favorita`: Asserts the existence of the `favorita` schema.
+- `test_tables_exist`: Parametrized test that asserts the existence of key tables in the `favorita` schema.
+- `test_hypertable_train`: Asserts that `favorita.train` is a TimescaleDB hypertable.
+- `test_hypertable_test`: Asserts that `favorita.test` is a TimescaleDB hypertable.
+- `test_indices_exist`: Parametrized test that asserts the existence of essential indexes.
+
+Usage:
+------
+To run the tests, ensure the PostgreSQL server is running, the database is accessible via the
+`DB_DSN`, and execute:
+
+    pytest test_db_structure.py
+
+This ensures your TimescaleDB-powered PostgreSQL instance is correctly structured and optimized
+for time-series operations and analytical workloads.
+"""
+
 import os
 import pytest
 import psycopg2
