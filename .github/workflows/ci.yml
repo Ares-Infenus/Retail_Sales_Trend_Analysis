@@ -32,10 +32,10 @@ jobs:
       - name: Run install.ps1
         shell: pwsh
         run: |
-          if (Test-Path -Path "./install.ps1") {
-            Write-Host "🔧 Ejecutando install.ps1 para crear Docker Compose..."
-            ./install.ps1
+          if (Test-Path -Path "./scripts/install.ps1") {
+            Write-Host "🔧 Ejecutando scripts/install.ps1 para crear Docker Compose..."
+            ./scripts/install.ps1
           } else {
-            Write-Error "❌ No se encontró install.ps1"
+            Write-Error "❌ No se encontró scripts/install.ps1"
             exit 1
           }
