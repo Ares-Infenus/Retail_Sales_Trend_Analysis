@@ -46,14 +46,14 @@ jobs:
         run: |
           ./scripts/install.ps1
 
-      - name: Verificar creación de contenedor
-        run: |
-          docker ps --filter "ancestor=timescale/timescaledb:latest-pg17" --format "{{.ID}}" | grep -q .
-
-      - name: Run start.ps1 (inicializar BD)
+      - name: Run start.ps1 (inicializar BD y arrancar contenedor)
         shell: pwsh
         run: |
           ./scripts/start.ps1
+
+      - name: Verificar que el contenedor está en ejecución
+        run: |
+          docker ps --filter "ancestor=timescale/timescaledb:latest-pg17" --format "{{.ID}}" | grep -q .
 
       - name: Esperar a Postgres
         run: |
