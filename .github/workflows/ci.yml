@@ -40,6 +40,17 @@ jobs:
             exit 1
           }
 
+      - name: Create containers before starting them
+        shell: pwsh
+        run: |
+          if (Test-Path -Path "./infra/docker-compose.yml") {
+            Write-Host "📦 Creando contenedores desde infra/docker-compose.yml..."
+            docker compose -f ./infra/docker-compose.yml up -d --no-start
+          } else {
+            Write-Error "❌ No se encontró infra/docker-compose.yml"
+            exit 1
+          }
+
       - name: Start and initialize containers
         shell: pwsh
         env:
