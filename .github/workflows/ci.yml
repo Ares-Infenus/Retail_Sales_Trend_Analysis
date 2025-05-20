@@ -109,9 +109,12 @@ jobs:
           done
 
       - name: Initialize database schema
+        shell: bash
+        env:
+          PGPASSWORD: postgres
         run: |
-          psql postgresql://postgres:postgres@localhost:5432/postgres \
-            -f infra/init_schema.sql
+          psql -h localhost -U postgres -d postgres \
+            -f ./infra/migrations/001_initial_schema.sql
 
       - name: Run schema tests
         env:
