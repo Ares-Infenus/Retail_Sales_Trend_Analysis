@@ -126,7 +126,7 @@ def index_exists(cur, index_name):
     return cur.fetchone()[0]
 
 
-def test_extension_timescaledb(db_conn):
+def test_extension_timescaledb(conn):
     """
     Verifies that the TimescaleDB extension is enabled in the connected PostgreSQL database.
 
@@ -134,12 +134,12 @@ def test_extension_timescaledb(db_conn):
     'timescaledb' extension. Raises an assertion error if the extension is not found.
 
     Args:
-        db_conn (psycopg2.extensions.connection): An active database connection.
+        conn (psycopg2.extensions.connection): An active database connection.
 
     Raises:
         AssertionError: If the TimescaleDB extension is not enabled.
     """
-    cur = db_conn.cursor()
+    cur = conn.cursor()
     try:
         cur.execute("SELECT extname FROM pg_extension WHERE extname = 'timescaledb';")
         assert cur.fetchone() is not None, "La extensión timescaledb no está habilitada"
@@ -147,7 +147,7 @@ def test_extension_timescaledb(db_conn):
         cur.close()
 
 
-def test_schema_favorita(db_conn):
+def test_schema_favorita(conn):
     """
     Verifies that the 'favorita' schema exists in the connected PostgreSQL database.
 
@@ -155,12 +155,12 @@ def test_schema_favorita(db_conn):
     the schema named 'favorita' exists. Raises an assertion error if it does not.
 
     Args:
-        db_conn (psycopg2.extensions.connection): An active database connection.
+        conn (psycopg2.extensions.connection): An active database connection.
 
     Raises:
         AssertionError: If the 'favorita' schema does not exist.
     """
-    cur = db_conn.cursor()
+    cur = conn.cursor()
     try:
         cur.execute(
             """
@@ -188,7 +188,7 @@ def test_schema_favorita(db_conn):
         "test",
     ],
 )
-def test_tables_exist(db_conn, table):
+def test_tables_exist(conn, table):
     """
     Verifies that a specific table exists in the 'favorita' schema of the PostgreSQL database.
 
@@ -196,20 +196,20 @@ def test_tables_exist(db_conn, table):
     Raises an assertion error if the table does not exist.
 
     Args:
-        db_conn (psycopg2.extensions.connection): An active database connection.
+        conn (psycopg2.extensions.connection): An active database connection.
         table (str): The name of the table to check within the 'favorita' schema.
 
     Raises:
         AssertionError: If the specified table does not exist.
     """
-    cur = db_conn.cursor()
+    cur = conn.cursor()
     try:
         assert table_exists(cur, "favorita", table), f"Falta tabla favorita.{table}"
     finally:
         cur.close()
 
 
-def test_hypertable_train(db_conn):
+def test_hypertable_train(conn):
     """
     Verifies that the table 'favorita.train' is registered as a hypertable in TimescaleDB.
 
@@ -217,12 +217,12 @@ def test_hypertable_train(db_conn):
     'favorita.train' is a hypertable. Raises an assertion error if it is not.
 
     Args:
-        db_conn (psycopg2.extensions.connection): An active database connection.
+        conn (psycopg2.extensions.connection): An active database connection.
 
     Raises:
         AssertionError: If 'favorita.train' is not a hypertable.
     """
-    cur = db_conn.cursor()
+    cur = conn.cursor()
     try:
         cur.execute(
             """
@@ -239,7 +239,7 @@ def test_hypertable_train(db_conn):
         cur.close()
 
 
-def test_hypertable_test(db_conn):
+def test_hypertable_test(conn):
     """
     Verifies that the table 'favorita.test' is registered as a hypertable in TimescaleDB.
 
@@ -247,12 +247,12 @@ def test_hypertable_test(db_conn):
     Raises an assertion error if the hypertable is not found.
 
     Args:
-        db_conn (psycopg2.extensions.connection): An active database connection.
+        conn (psycopg2.extensions.connection): An active database connection.
 
     Raises:
         AssertionError: If 'favorita.test' is not a hypertable.
     """
-    cur = db_conn.cursor()
+    cur = conn.cursor()
     try:
         cur.execute(
             """
@@ -281,7 +281,7 @@ def test_hypertable_test(db_conn):
         "idx_holidays_locale",
     ],
 )
-def test_indices_exist(db_conn, idx):
+def test_indices_exist(conn, idx):
     """
     Verifies that a specific index exists in the connected PostgreSQL database.
 
@@ -289,13 +289,13 @@ def test_indices_exist(db_conn, idx):
     Raises an assertion error if the index is missing.
 
     Args:
-        db_conn (psycopg2.extensions.connection): An active database connection.
+        conn (psycopg2.extensions.connection): An active database connection.
         idx (str): The name of the index to verify.
 
     Raises:
         AssertionError: If the specified index does not exist.
     """
-    cur = db_conn.cursor()
+    cur = conn.cursor()
     try:
         assert index_exists(cur, idx), f"Falta índice {idx}"
     finally:
