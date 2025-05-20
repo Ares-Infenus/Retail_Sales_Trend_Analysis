@@ -39,3 +39,14 @@ jobs:
             Write-Error "❌ No se encontró scripts/install.ps1"
             exit 1
           }
+
+      - name: Start and initialize containers
+        shell: pwsh
+        run: |
+          if (Test-Path -Path "./scripts/start.ps1") {
+            Write-Host "🚀 Iniciando contenedores y creando arquitectura de base de datos..."
+            ./scripts/start.ps1
+          } else {
+            Write-Error "❌ No se encontró scripts/start.ps1"
+            exit 1
+          }
