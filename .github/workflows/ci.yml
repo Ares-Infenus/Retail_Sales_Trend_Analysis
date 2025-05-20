@@ -10,6 +10,13 @@ jobs:
   base-setup:
     runs-on: ubuntu-latest
 
+    env:
+      PGHOST: localhost
+      PGPORT: 5432
+      PGUSER: usuario
+      PGPASSWORD: password
+      PGDATABASE: Grocery_Sales
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -28,3 +35,36 @@ jobs:
             echo "❌ No se encontró environment.txt"
             exit 1
           fi
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Run install.ps1 (crear contenedor)
+        shell: pwsh
+        run: |
+          ./scripts/install.ps1
+
+      - name: Verificar creación de contenedor
+        run: |
+          docker ps --filter "ancestor=timescale/timescaledb:latest-pg17" --format "{{.ID}}" | grep -q .
+
+      - name: Run start.ps1 (inicializar BD)
+        shell: pwsh
+        run: |
+          ./scripts/start.ps1
+
+      - name: Esperar a Postgres
+        run: |
+          until pg_isready -h $PGHOST -p $PGPORT -U $PGUSER -d $PGDATABASE; do
+            echo "Waiting for Postgres..."
+            sleep 2
+          done
+
+      - name: Verificar schema y tablas en BD
+        run: |
+          psql -h $PGHOST -p $PGPORT -U $PGUSER -d $PGDATABASE -c "SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'favorita';" | grep -q favorita
+          for table in stores items transactions oil holidays_events sample_submission train test; do
+            psql -h $PGHOST -p $PGPORT -U $PGUSER -d $PGDATABASE -c "SELECT to_regclass('favorita.$table')" | grep -q "favorita\.$table";
+          done
