@@ -42,6 +42,13 @@ jobs:
 
       - name: Start and initialize containers
         shell: pwsh
+        env:
+          pythonLocation: /opt/hostedtoolcache/Python/3.12.7/x64
+          PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.7/x64/lib/pkgconfig
+          Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.7/x64
+          Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.7/x64
+          Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.7/x64
+          LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.7/x64/lib
         run: |
           if (Test-Path -Path "./scripts/start.ps1") {
             Write-Host "🚀 Iniciando contenedores y creando arquitectura de base de datos..."

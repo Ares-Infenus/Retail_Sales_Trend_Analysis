@@ -1,52 +1,45 @@
-name: CI Pipeline
+#!/usr/bin/env pwsh
+<#
+    start-container.ps1: Inicia los contenedores definidos en infra/docker-compose.yml
+    y avisa si no están creados.
+    Compatible con PowerShell Core (Windows & Linux) y Windows PowerShell.
+#>
 
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+# Función para abortar con mensaje de error
+function Abort([string]$msg) {
+    Write-Error $msg
+    exit 1
+}
 
-jobs:
-  base-setup:
-    runs-on: ubuntu-latest
+# Verificar Docker
+try {
+    docker version > $null 2>&1
+} catch {
+    Abort "Docker no encontrado o no está en ejecución."
+}
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+# Ubicar docker-compose.yml y verificar que los contenedores existan
+$scriptDir = Split-Path -Path $MyInvocation.MyCommand.Path -Parent
+$projectRoot = Resolve-Path -Path (Join-Path $scriptDir '..')
+$composeFile = Join-Path $projectRoot 'infra\docker-compose.yml'
+if (-not (Test-Path $composeFile)) {
+    Abort "No se encontró docker-compose.yml en infra. Ejecuta antes la preparación."
+}
 
-      - name: Set up Python 3.12.7
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.12.7'
+# Seleccionar comando de Compose
+if (docker compose version -q 2>$null) {
+    $composeCmd = 'docker compose'
+} elseif (Get-Command docker-compose -ErrorAction SilentlyContinue) {
+    $composeCmd = 'docker-compose'
+} else {
+    Abort "Ni 'docker compose' ni 'docker-compose' disponibles.";
+}
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          if [ -f environment.txt ]; then
-            pip install -r environment.txt
-          else
-            echo "❌ No se encontró environment.txt"
-            exit 1
-          fi
-
-      - name: Run install.ps1
-        shell: pwsh
-        run: |
-          if (Test-Path -Path "./scripts/install.ps1") {
-            Write-Host "🔧 Ejecutando scripts/install.ps1 para crear Docker Compose..."
-            ./scripts/install.ps1
-          } else {
-            Write-Error "❌ No se encontró scripts/install.ps1"
-            exit 1
-          }
-
-      - name: Start and initialize containers
-        shell: pwsh
-        run: |
-          if (Test-Path -Path "./scripts/start.ps1") {
-            Write-Host "🚀 Iniciando contenedores y creando arquitectura de base de datos..."
-            ./scripts/start.ps1
-          } else {
-            Write-Error "❌ No se encontró scripts/start.ps1"
-            exit 1
-          }
+# Intentar iniciar contenedores
+Write-Host "→ Iniciando contenedores..."
+& $composeCmd -f $composeFile start
+if ($LASTEXITCODE -eq 0) {
+    Write-Host "✅ Contenedores iniciados correctamente."
+} else {
+    Abort "❌ Error al iniciar contenedores (exit code: $LASTEXITCODE). Verifica que estén creados."  
+}
