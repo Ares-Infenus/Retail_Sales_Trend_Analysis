@@ -3,36 +3,49 @@ import sys
 import glob
 import warnings
 from logging.handlers import RotatingFileHandler
-import math
 import logging
-import traceback
 import multiprocessing as mp  # type: ignore
-from typing import List, Optional, Tuple, Dict, Any
-import pandas as pd
-import numpy as np
-from tqdm import tqdm
-
-# Hacer que cada warning concreto solo aparezca una vez
-warnings.filterwarnings("once", message="All-NaN slice encountered")
-warnings.filterwarnings("once", message="Mean of empty slice")
+from typing import Any, Dict, List, Optional, Union, TypedDict
 import shutil
 import json
 import pandas as pd
 import numpy as np
+from tqdm import tqdm
 from scipy.stats import ks_2samp
-from scipy.spatial import distance
 from pandas.api.types import (
     is_bool_dtype,
-    is_numeric_dtype,
     is_categorical_dtype,
-    is_object_dtype,
     is_datetime64_any_dtype,
+    is_numeric_dtype,
+    is_object_dtype,
 )
+
+
+class NumericStats(TypedDict):
+    """
+    Diccionario tipado que almacena estadísticas numéricas acumuladas.
+
+    Atributos:
+        sum (float): Suma acumulada de los valores.
+        sum2 (float): Suma acumulada de los cuadrados de los valores (útil para calcular la varianza).
+        count (int): Cantidad de elementos acumulados.
+        values (List[np.ndarray]): Lista de arrays NumPy con los valores individuales registrados.
+            Puede ser un solo np.ndarray si se prefiere esa representación.
+    """
+
+    sum: float
+    sum2: float
+    count: int
+    values: List[np.ndarray]  # o np.ndarray si es solo uno
+
 
 try:
     import psutil
 except ImportError:
     psutil = None
+# Hacer que cada warning concreto solo aparezca una vez
+warnings.filterwarnings("once", message="All-NaN slice encountered")
+warnings.filterwarnings("once", message="Mean of empty slice")
 
 
 # -------------------- Logging Setup --------------------
@@ -65,13 +78,24 @@ logger = setup_logger("synthetic_sampler.log")
 
 # -------------------- Utility Functions --------------------
 def get_free_memory_mb() -> float:
+    """
+    Returns the amount of available memory in megabytes (MB).
+
+    Tries to use `psutil` to get the available virtual memory. If `psutil` is not available,
+    falls back to checking the free disk space in the current working directory.
+
+    Returns:
+        float: The amount of free memory (or disk space) in megabytes.
+
+    Raises:
+        RuntimeError: If the available memory or disk space cannot be determined.
+    """
     try:
         if psutil:
             mem = psutil.virtual_memory()
             return mem.available / (1024 * 1024)
         else:
-
-            total, used, free = shutil.disk_usage(os.getcwd())
+            _, _, free = shutil.disk_usage(os.getcwd())
             return free / (1024 * 1024)
     except Exception as e:
         logger.error("Error getting free memory: %s", e, exc_info=True)
@@ -79,6 +103,18 @@ def get_free_memory_mb() -> float:
 
 
 def get_file_size_mb(path: str) -> float:
+    """
+    Returns the size of a file in megabytes (MB).
+
+    Args:
+        path (str): The full path to the file.
+
+    Returns:
+        float: The size of the file in megabytes.
+
+    Raises:
+        Exception: If there is an error accessing the file size.
+    """
     try:
         return os.path.getsize(path) / (1024 * 1024)
     except Exception as e:
@@ -87,15 +123,36 @@ def get_file_size_mb(path: str) -> float:
 
 
 def discover_csv_files(folder: str) -> List[str]:
+    """
+    Finds all `.csv` files in a given folder.
+
+    Args:
+        folder (str): The path to the directory to search.
+
+    Returns:
+        List[str]: A list of paths to `.csv` files found in the folder.
+    """
     pattern = os.path.join(folder, "*.csv")
     files = glob.glob(pattern)
     return files
 
 
-def safe_open_file(path: str, mode: str = "r"):
+def safe_open_file(path: str, mode: str = "r") -> None:
+    """
+    Safely attempts to open a file to check if it is accessible.
+
+    Args:
+        path (str): The file path to open.
+        mode (str): The mode in which to open the file (default is 'r').
+
+    Raises:
+        FileNotFoundError: If the file does not exist.
+        PermissionError: If there are insufficient permissions to open the file.
+        OSError: For other I/O-related errors.
+    """
     try:
         with open(path, mode):
-            pass
+            pass  # File is accessible
     except FileNotFoundError as e:
         logger.error("File not found: %s", path, exc_info=True)
         raise
@@ -108,15 +165,34 @@ def safe_open_file(path: str, mode: str = "r"):
 
 
 def get_num_workers() -> int:
+    """
+    Calcula el número óptimo de procesos a usar para paralelismo.
+
+    Intenta obtener el número de CPUs disponibles y devuelve uno menos
+    (dejando un CPU libre para el sistema). En caso de error, devuelve 1.
+
+    Returns:
+        int: Número de procesos recomendados para el pool de multiprocessing.
+    """
     try:
         cpu_count = mp.cpu_count()
         return max(1, cpu_count - 1)
-    except Exception as e:
-        logger.error("Error getting CPU count: %s", e, exc_info=True)
+    except NotImplementedError as e:
+        logger.error("CPU count not implemented on this platform: %s", e, exc_info=True)
         return 1
 
 
-def print_startup_info(num_files: int, free_mem_mb: float):
+def print_startup_info(num_files: int, free_mem_mb: float) -> None:
+    """
+    Muestra por consola información inicial del pipeline.
+
+    Imprime el número de archivos CSV detectados, la memoria libre disponible
+    y un recordatorio de cómo interrumpir el proceso.
+
+    Args:
+        num_files (int): Cantidad de archivos CSV encontrados.
+        free_mem_mb (float): Memoria libre disponible en MB.
+    """
     print(
         f"Archivos CSV detectados: {num_files}\n"
         f"Memoria libre total: {free_mem_mb:.2f} MB\n"
@@ -127,25 +203,58 @@ def print_startup_info(num_files: int, free_mem_mb: float):
 
 # -------------------- Sampling Logic --------------------
 class ChunkSampler:
+    """
+    Clase para muestrear filas de múltiples fragmentos (chunks) de un DataFrame de pandas
+    hasta alcanzar un número total de filas deseado. Ideal para leer archivos CSV grandes
+    por partes y obtener una muestra representativa sin cargar todo el archivo en memoria.
+
+    Atributos:
+        target_rows (int): Número total de filas que se desea muestrear.
+        logger (logging.Logger): Logger para registrar errores y eventos.
+        random_state (Optional[int]): Semilla para reproducibilidad en el muestreo aleatorio.
+        sampled_chunks (List[pd.DataFrame]): Lista acumulada de fragmentos ya muestreados.
+        rows_sampled (int): Total de filas acumuladas hasta el momento.
+    """
+
     def __init__(
         self,
         target_rows: int,
-        logger: logging.Logger,
+        local_logger: logging.Logger,
         random_state: Optional[int] = None,
     ):
+        """
+        Inicializa el muestreador de fragmentos.
+
+        Args:
+            target_rows (int): Número total de filas a muestrear.
+            local_logger (logging.Logger): Logger para errores y seguimiento.
+            random_state (Optional[int]): Semilla para reproducibilidad (por defecto 42).
+        """
         self.target_rows = target_rows
-        self.logger = logger
+        self.logger = local_logger
         self.random_state = random_state or 42
         self.sampled_chunks: List[pd.DataFrame] = []
         self.rows_sampled = 0
 
     def sample_chunk(self, chunk: pd.DataFrame, remaining: int) -> pd.DataFrame:
+        """
+        Muestra un subconjunto del fragmento dado, sin reemplazo, respetando el número
+        de filas restantes necesarias.
+
+        Args:
+            chunk (pd.DataFrame): Fragmento de datos a muestrear.
+            remaining (int): Número de filas que aún se necesitan.
+
+        Returns:
+            pd.DataFrame: Subconjunto muestreado del fragmento original.
+        """
         try:
             n = min(len(chunk), remaining)
             if n <= 0:
                 return pd.DataFrame()
-            # Sample without replacement
-            sampled = chunk.sample(n=n, replace=False, random_state=self.random_state)
+            sampled = chunk.sample(  # type: ignore
+                n=n, replace=False, random_state=self.random_state  # type: ignore
+            )  # type: ignore
             return sampled
         except Exception as e:
             self.logger.error(
@@ -154,6 +263,13 @@ class ChunkSampler:
             raise
 
     def accumulate(self, chunk: pd.DataFrame):
+        """
+        Muestra un fragmento parcial del chunk y lo acumula, si aún no se ha
+        alcanzado el total deseado de filas.
+
+        Args:
+            chunk (pd.DataFrame): Fragmento de datos a procesar.
+        """
         remaining = self.target_rows - self.rows_sampled
         if remaining <= 0:
             return
@@ -162,104 +278,158 @@ class ChunkSampler:
         self.rows_sampled += len(sampled)
 
     def get_sample(self) -> pd.DataFrame:
+        """
+        Devuelve el DataFrame combinado de todos los fragmentos muestreados.
+
+        Returns:
+            pd.DataFrame: Muestra combinada de los fragmentos procesados.
+        """
         if self.sampled_chunks:
             return pd.concat(self.sampled_chunks, ignore_index=True)
         return pd.DataFrame()
 
 
 class StatsCollector:
-    def __init__(self, logger: logging.Logger):
+    """
+    Clase para recolectar estadísticas de columnas en bloques de datos tipo pandas.DataFrame.
+
+    Guarda estadísticas numéricas (incl. fechas y booleanos), categóricas y valores especiales
+    como NaNs e infinitos. Permite resumirlas posteriormente.
+
+    Atributos:
+        logger (logging.Logger): Logger para registrar errores o advertencias.
+        numeric_stats (Dict[str, Dict[str, Any]]): Estadísticas numéricas por columna.
+        categorical_stats (Dict[str, Dict[str, Any]]): Frecuencias relativas por categoría.
+        special_values (Dict[str, Dict[str, Any]]): Conteo de valores especiales (NaN, Inf, total).
+    """
+
+    def __init__(self, logger: logging.Logger) -> None:
+        """
+        Inicializa la clase StatsCollector con un logger.
+
+        Args:
+            logger (logging.Logger): Objeto logger para registrar errores o advertencias.
+        """
         self.logger = logger
-        self.numeric_stats: Dict[str, Dict[str, Any]] = {}
-        self.categorical_stats: Dict[str, Dict[str, Any]] = {}
-        self.special_values: Dict[str, Dict[str, Any]] = {}
+        self.numeric_stats: Dict[
+            str, Dict[str, Union[int, float, List[np.ndarray]]]
+        ] = {}
+        self.categorical_stats: Dict[str, Dict[Any, float]] = {}
+        self.special_values: Dict[str, Dict[str, int]] = {}
 
-    def update(self, chunk: pd.DataFrame):
-        for col in chunk.columns:
+    def update(self, chunk: pd.DataFrame) -> None:
+        """
+        Actualiza las estadísticas acumuladas con un nuevo bloque de datos.
+
+        Detecta el tipo de cada columna (numérico, categórico, datetime) y actualiza
+        los contadores, sumas, percentiles o frecuencias relativas.
+
+        También actualiza los contadores de valores especiales: NaN e infinito.
+
+        Args:
+            chunk (pd.DataFrame): Un DataFrame que contiene las columnas a analizar.
+        """
+        for col in chunk.columns:  # type: str
+            # anotar tipo de col_raw para Pylance
+            col_raw: pd.Series[Any] = chunk[col]
             try:
-                col_raw = chunk[col]
-                # —————————— NUEVA RAMA: DATETIME ——————————
-                # Si es datetime, lo convertimos a segundos desde epoch
-                from pandas.api.types import is_datetime64_any_dtype
-
+                # —————————— DATETIME ——————————
                 if is_datetime64_any_dtype(col_raw):
-                    # Los nanosegundos / 10**9 → segundos
-                    col_data = col_raw.astype("int64") // 10**9
+                    col_data: pd.Series[np.int64] = col_raw.astype("int64") // 10**9
                     stats = self.numeric_stats.setdefault(
-                        col, {"count": 0, "sum": 0.0, "sum2": 0.0, "values": []}
+                        col,
+                        {"count": 0, "sum": 0.0, "sum2": 0.0, "values": []},
                     )
                     stats["count"] += int(col_data.count())
                     stats["sum"] += float(col_data.sum())
                     stats["sum2"] += float((col_data**2).sum())
-                    # Calcular percentiles suprimiendo warnings de “All-NaN slice”
                     try:
                         with warnings.catch_warnings():
                             warnings.simplefilter("ignore", category=RuntimeWarning)
                             percentiles = np.nanpercentile(col_data, [10, 50, 90])
                     except Exception as e:
-                        percentiles = [np.nan] * 3
-                        self.logger.warning(f"Percentiles fecha fallaron en {col}: {e}")
+                        percentiles = np.array([np.nan, np.nan, np.nan])
+                        self.logger.warning(
+                            f"Percentiles datetime fallaron en {col}: {e}"
+                        )
                     stats["values"].append(percentiles)
-                    # Luego procesamos specials (NaN no aplica para datetime)
+
                     specials = self.special_values.setdefault(
                         col, {"nan": 0, "inf": 0, "total": 0}
                     )
                     specials["nan"] += int(col_data.isna().sum())
                     specials["inf"] += 0
                     specials["total"] += len(col_data)
-                    # Saltar al siguiente col
                     continue
-                # ————————————————————————————————————————————————
-                # ================= Numeric (incluye bool) =================
+
+                # —————————— NUMERIC & BOOL ——————————
                 if is_numeric_dtype(col_raw) or is_bool_dtype(col_raw):
-                    # Convertir booleanos a float (True→1.0, False→0.0)
                     if is_bool_dtype(col_raw):
-                        col_data = col_raw.astype(float)
+                        col_data: pd.Series[float] = col_raw.astype(float)
                     else:
                         col_data = pd.to_numeric(col_raw, errors="coerce")
 
                     stats = self.numeric_stats.setdefault(
-                        col, {"count": 0, "sum": 0.0, "sum2": 0.0, "values": []}
+                        col,
+                        {"count": 0.0, "sum": 0.0, "sum2": 0.0, "values": []},
                     )
                     stats["count"] += int(col_data.count())
                     stats["sum"] += float(col_data.sum(skipna=True))
                     stats["sum2"] += float((col_data**2).sum(skipna=True))
 
-                    # Calcular percentiles suprimiendo warnings de “All-NaN slice”
-                    try:
-                        with warnings.catch_warnings():
-                            warnings.simplefilter("ignore", category=RuntimeWarning)
-                            percentiles = np.nanpercentile(col_data, [10, 50, 90])
-                    except Exception as e:
-                        percentiles = [np.nan] * 3
-                        self.logger.warning(f"Percentiles fecha fallaron en {col}: {e}")
-                    stats["values"].append(percentiles)
+                    # <<< REEMPLAZA ESTE BLOQUE POR EL SIGUI >>>
+                    # Solución robusta: solo calcular si hay datos no-NaN
+                    clean = col_data.dropna()
+                    if clean.size > 0:
+                        try:
+                            p = np.nanpercentile(clean, [10, 50, 90])
+                            p = np.atleast_1d(p).flatten()
+                            if p.shape != (3,):
+                                raise ValueError(f"Percentiles inesperados: {p.shape}")
+                        except Exception:
+                            p = np.array([np.nan, np.nan, np.nan])
+                    else:
+                        # no hay datos válidos
+                        p = np.array([np.nan, np.nan, np.nan])
+                    stats["values"].append(p)
 
-                # ============== Categorical / Object =====================
+                # —————————— CATEGÓRICO ——————————
                 elif is_categorical_dtype(col_raw) or is_object_dtype(col_raw):
-                    freq = col_raw.value_counts(normalize=True, dropna=False)
+                    freq: pd.Series = col_raw.value_counts(normalize=True, dropna=False)
                     cat_stats = self.categorical_stats.setdefault(col, {})
-                    for cat, rel_freq in freq.items():
-                        cat_stats[cat] = cat_stats.get(cat, 0.0) + float(rel_freq)
+                    for category, rel_freq in freq.items():
+                        cat_stats[category] = cat_stats.get(category, 0.0) + float(
+                            rel_freq
+                        )
 
-                # ============== Special Values (NaN / Inf) ===============
-                # Esto se aplica a todas las columnas
+                # —————————— VALORES ESPECIALES ——————————
                 specials = self.special_values.setdefault(
                     col, {"nan": 0, "inf": 0, "total": 0}
                 )
                 specials["nan"] += int(col_raw.isna().sum())
-                specials["inf"] += int(
-                    np.isinf(col_raw).sum() if is_numeric_dtype(col_raw) else 0
-                )
-                specials["total"] += int(len(col_raw))
+                specials["inf"] += int(np.isinf(col_raw).sum()) if is_numeric_dtype(col_raw) else 0  # type: ignore
+                specials["total"] += len(col_raw)
 
-            except Exception as e:
+            except (TypeError, ValueError, KeyError) as e:
+                # Capturamos sólo excepciones esperables de datos mal formados
                 self.logger.error(
                     "Error collecting stats for column %s: %s", col, e, exc_info=True
                 )
+            # No capturamos Exception amplio para no esconder otros errores
 
-    def summarize(self) -> Dict[str, Any]:
-        summary = {}
+    def summarize(self) -> Dict[str, Dict[str, Any]]:
+        """
+        Devuelve un resumen de las estadísticas recolectadas.
+
+        Calcula la media, varianza y percentiles (10, 50, 90) para columnas numéricas.
+        Calcula frecuencias relativas para columnas categóricas.
+        Calcula proporciones de valores NaN e Inf para todas las columnas.
+
+        Returns:
+            Dict[str, Dict[str, Any]]: Diccionario con resumen de estadísticas por columna.
+        """
+        summary: Dict[str, Dict[str, Any]] = {}
+
         for col, stats in self.numeric_stats.items():
             try:
                 mean = stats["sum"] / stats["count"] if stats["count"] else np.nan
@@ -269,58 +439,75 @@ class StatsCollector:
                     else np.nan
                 )
 
-                # Suprimir warnings aquí sólo para la media de percentiles
+                # ———————— BLOQUE CORREGIDO DE PERCENTILES ————————
                 with warnings.catch_warnings():
                     warnings.simplefilter("ignore", category=RuntimeWarning)
-                    percentiles = (
-                        np.nanmean(stats["values"], axis=0)
-                        if stats["values"]
-                        else [np.nan, np.nan, np.nan]
-                    )
+                    if stats["values"]:
+                        arr = np.stack(stats["values"], axis=0)
+                        # Solo promediar si hay al menos un valor no-NaN
+                        if not np.all(np.isnan(arr)):
+                            percentiles = np.nanmean(arr, axis=0)
+                        else:
+                            percentiles = np.array([np.nan, np.nan, np.nan])
+                    else:
+                        percentiles = np.array([np.nan, np.nan, np.nan])
+                # ————— FIN BLOQUE PERCENTILES —————
+
                 summary[col] = {
                     "mean": mean,
                     "var": var,
-                    "percentiles": percentiles,
+                    "percentiles": percentiles.tolist(),
                 }
-            except Exception as e:
+            except (TypeError, ValueError, KeyError) as e:
                 self.logger.error(
-                    "Error summarizing numeric stats for %s: %s",
-                    col,
-                    e,
-                    exc_info=True,
+                    "Error summarizing numeric stats for %s: %s", col, e, exc_info=True
                 )
+
         for col, cats in self.categorical_stats.items():
             try:
                 total = sum(cats.values())
                 rel_freqs = {k: v / total for k, v in cats.items()} if total else {}
                 summary[col] = {"rel_freqs": rel_freqs}
-            except Exception as e:
+            except (TypeError, ValueError) as e:
                 self.logger.error(
                     "Error summarizing categorical stats for %s: %s",
                     col,
                     e,
                     exc_info=True,
                 )
+
         for col, specials in self.special_values.items():
             try:
                 total = specials["total"]
                 nan_prop = specials["nan"] / total if total else np.nan
                 inf_prop = specials["inf"] / total if total else np.nan
-                summary.setdefault(col, {}).update(
-                    {"nan_prop": nan_prop, "inf_prop": inf_prop}
-                )
-            except Exception as e:
+
+                col_summary = summary.setdefault(col, {})
+                col_summary["nan_prop"] = nan_prop
+                col_summary["inf_prop"] = inf_prop
+            except (TypeError, ZeroDivisionError) as e:
                 self.logger.error(
-                    "Error summarizing special values for %s: %s",
-                    col,
-                    e,
-                    exc_info=True,
+                    "Error summarizing special values for %s: %s", col, e, exc_info=True
                 )
+
         return summary
 
 
 # -------------------- File Processing --------------------
 class SyntheticSampler:
+    """
+    Clase encargada de generar una muestra sintética desde un archivo CSV de entrada.
+    Utiliza muestreo por chunks, recolecta estadísticas y compara distribuciones.
+
+    Atributos:
+        input_path (str): Ruta al archivo CSV de entrada.
+        output_path (str): Ruta donde se guardará la muestra generada.
+        target_rows (int): Número objetivo de filas para la muestra.
+        logger (logging.Logger): Logger para registrar eventos y errores.
+        chunk_size_mb (float): Tamaño del chunk en megabytes.
+        random_state (Optional[int]): Semilla aleatoria para reproducibilidad.
+    """
+
     def __init__(
         self,
         input_path: str,
@@ -330,6 +517,17 @@ class SyntheticSampler:
         chunk_size_mb: float,
         random_state: Optional[int] = None,
     ):
+        """
+        Inicializa la clase SyntheticSampler.
+
+        Args:
+            input_path (str): Ruta al archivo CSV de entrada.
+            output_path (str): Ruta al archivo CSV de salida.
+            target_rows (int): Cantidad de filas deseadas en la muestra sintética.
+            logger (logging.Logger): Instancia de logger para registrar eventos.
+            chunk_size_mb (float): Tamaño del chunk de lectura en megabytes.
+            random_state (Optional[int], opcional): Semilla para la aleatoriedad.
+        """
         self.input_path = input_path
         self.output_path = output_path
         self.target_rows = target_rows
@@ -338,17 +536,35 @@ class SyntheticSampler:
         self.random_state = random_state or 42
 
     def process(self) -> bool:
+        """
+        Procesa el archivo de entrada por chunks, genera una muestra aleatoria
+        con estadísticas asociadas y guarda los resultados.
+
+        Realiza los siguientes pasos:
+        1. Estima tamaño de chunk según memoria disponible.
+        2. Lee el archivo en chunks.
+        3. Recolecta estadísticas con StatsCollector.
+        4. Aplica muestreo con ChunkSampler.
+        5. Guarda el CSV de salida.
+        6. Escribe archivo JSON con estadísticas.
+        7. Compara la distribución original vs la muestra y guarda el resultado.
+
+        Returns:
+            bool: True si el proceso fue exitoso, False si hubo errores críticos.
+        """
         try:
             safe_open_file(self.input_path, "r")
             file_size = get_file_size_mb(self.input_path)
             free_mem = get_free_memory_mb()
-        except Exception as e:
+        except (OSError, IOError) as e:
             self.logger.error(
-                "Skipping file due to I/O error: %s", self.input_path, exc_info=True
+                "Skipping file due to I/O error: %s (%s)",
+                self.input_path,
+                str(e),
+                exc_info=True,
             )
             return False
 
-        # Estimate chunk size
         try:
             buffer_mb = 200  # MB buffer for safety
             usable_mem = max(1, free_mem - buffer_mb)
@@ -369,7 +585,6 @@ class SyntheticSampler:
         sampler = ChunkSampler(self.target_rows, self.logger, self.random_state)
         stats_collector = StatsCollector(self.logger)
 
-        # Lectura por chunks con barra de progreso
         try:
             try:
                 total_rows = sum(1 for _ in open(self.input_path, encoding="utf-8")) - 1
@@ -405,7 +620,6 @@ class SyntheticSampler:
                             "Indexing error in chunk: %s", e, exc_info=True
                         )
                     except Exception:
-                        # Captura full traceback en el log de archivo
                         self.logger.exception("Critical error processing chunk")
                 pbar.close()
         except KeyboardInterrupt:
@@ -419,12 +633,10 @@ class SyntheticSampler:
             )
             return False
 
-        # Concatenar y recortar la muestra
         sample_df = sampler.get_sample()
         if len(sample_df) > self.target_rows:
             sample_df = sample_df.iloc[: self.target_rows]
 
-        # Guardar CSV sintético
         try:
             sample_df.to_csv(self.output_path, index=False, encoding="utf-8")
         except (IOError, OSError) as e:
@@ -441,7 +653,6 @@ class SyntheticSampler:
             )
             return False
 
-        # Guardar estadísticas de chunking
         stats = stats_collector.summarize()
         stats_path = self.output_path.replace(".csv", "_stats.json")
         try:
@@ -452,7 +663,6 @@ class SyntheticSampler:
                 "Could not write stats file for %s: %s", self.input_path, e
             )
 
-        # ——— NUEVO BLOQUE: comparar distribuciones y guardar resultado ———
         try:
             compare_results = compare_distributions(self.input_path, self.output_path)
             compare_path = self.output_path.replace(".csv", "_compare.json")
@@ -583,7 +793,6 @@ def compare_distributions(
             dates_s.append(chunk["date"].astype("int64") // 10**9)
 
         # KS test sobre timestamps
-        from scipy.stats import ks_2samp
 
         stat, _ = ks_2samp(np.concatenate(dates_o), np.concatenate(dates_s))
         results: Dict[str, Any] = {

@@ -180,3 +180,94 @@
 2025-05-19 14:11:33,337 [INFO] synthetic_sampler:461 Comparación guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\train_syn_compare.json
 2025-05-19 14:11:33,358 [INFO] synthetic_sampler:469 Archivo procesado: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\train.csv. Muestra sintética guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\train_syn.csv
 2025-05-19 14:11:33,403 [INFO] synthetic_sampler:533 Procesamiento completado. 9/9 archivos procesados exitosamente.
+2025-05-19 16:22:47,829 [INFO] synthetic_sampler:637 Usando 11 procesos en paralelo.
+2025-05-19 16:22:51,265 [INFO] synthetic_sampler:597 Comparación guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\stores_syn_compare.json
+2025-05-19 16:22:51,265 [INFO] synthetic_sampler:605 Archivo procesado: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\stores.csv. Muestra sintética guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\stores_syn.csv
+2025-05-19 16:22:51,372 [INFO] synthetic_sampler:597 Comparación guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\holidays_events_syn_compare.json
+2025-05-19 16:22:51,372 [INFO] synthetic_sampler:605 Archivo procesado: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\holidays_events.csv. Muestra sintética guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\holidays_events_syn.csv
+2025-05-19 16:22:51,415 [INFO] synthetic_sampler:597 Comparación guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\items_syn_compare.json
+2025-05-19 16:22:51,415 [INFO] synthetic_sampler:605 Archivo procesado: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\items.csv. Muestra sintética guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\items_syn.csv
+2025-05-19 16:22:51,474 [INFO] synthetic_sampler:597 Comparación guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\oil_syn_compare.json
+2025-05-19 16:22:51,474 [INFO] synthetic_sampler:605 Archivo procesado: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\oil.csv. Muestra sintética guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\oil_syn.csv
+2025-05-19 16:22:51,601 [INFO] synthetic_sampler:597 Comparación guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\oil_raw_Dukascopy_syn_compare.json
+2025-05-19 16:22:51,612 [INFO] synthetic_sampler:605 Archivo procesado: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\oil_raw_Dukascopy.csv. Muestra sintética guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\oil_raw_Dukascopy_syn.csv
+2025-05-19 16:22:51,846 [INFO] synthetic_sampler:597 Comparación guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\transactions_syn_compare.json
+2025-05-19 16:22:51,848 [INFO] synthetic_sampler:605 Archivo procesado: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\transactions.csv. Muestra sintética guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\transactions_syn.csv
+2025-05-19 16:22:55,990 [INFO] synthetic_sampler:597 Comparación guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\sample_submission_syn_compare.json
+2025-05-19 16:22:55,990 [INFO] synthetic_sampler:605 Archivo procesado: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\sample_submission.csv. Muestra sintética guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\sample_submission_syn.csv
+2025-05-19 16:23:03,021 [INFO] synthetic_sampler:597 Comparación guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\test_syn_compare.json
+2025-05-19 16:23:03,021 [INFO] synthetic_sampler:605 Archivo procesado: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\test.csv. Muestra sintética guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\test_syn.csv
+2025-05-19 16:27:54,445 [INFO] synthetic_sampler:597 Comparación guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\train_syn_compare.json
+2025-05-19 16:27:54,466 [INFO] synthetic_sampler:605 Archivo procesado: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\train.csv. Muestra sintética guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\train_syn.csv
+2025-05-19 16:27:54,496 [INFO] synthetic_sampler:669 Procesamiento completado. 9/9 archivos procesados exitosamente.
+2025-05-19 16:58:22,818 [INFO] synthetic_sampler:692 Usando 11 procesos en paralelo.
+2025-05-19 16:58:26,134 [INFO] synthetic_sampler:652 Comparación guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\stores_syn_compare.json
+2025-05-19 16:58:26,134 [INFO] synthetic_sampler:660 Archivo procesado: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\stores.csv. Muestra sintética guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\stores_syn.csv
+2025-05-19 16:58:26,177 [INFO] synthetic_sampler:652 Comparación guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\oil_syn_compare.json
+2025-05-19 16:58:26,177 [INFO] synthetic_sampler:660 Archivo procesado: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\oil.csv. Muestra sintética guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\oil_syn.csv
+2025-05-19 16:58:26,216 [INFO] synthetic_sampler:652 Comparación guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\holidays_events_syn_compare.json
+2025-05-19 16:58:26,216 [INFO] synthetic_sampler:660 Archivo procesado: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\holidays_events.csv. Muestra sintética guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\holidays_events_syn.csv
+2025-05-19 16:58:26,344 [INFO] synthetic_sampler:652 Comparación guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\items_syn_compare.json
+2025-05-19 16:58:26,345 [INFO] synthetic_sampler:660 Archivo procesado: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\items.csv. Muestra sintética guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\items_syn.csv
+2025-05-19 16:58:26,365 [INFO] synthetic_sampler:652 Comparación guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\oil_raw_Dukascopy_syn_compare.json
+2025-05-19 16:58:26,365 [INFO] synthetic_sampler:660 Archivo procesado: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\oil_raw_Dukascopy.csv. Muestra sintética guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\oil_raw_Dukascopy_syn.csv
+2025-05-19 16:58:26,689 [INFO] synthetic_sampler:652 Comparación guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\transactions_syn_compare.json
+2025-05-19 16:58:26,689 [INFO] synthetic_sampler:660 Archivo procesado: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\transactions.csv. Muestra sintética guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\transactions_syn.csv
+2025-05-19 16:58:30,933 [INFO] synthetic_sampler:652 Comparación guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\sample_submission_syn_compare.json
+2025-05-19 16:58:30,933 [INFO] synthetic_sampler:660 Archivo procesado: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\sample_submission.csv. Muestra sintética guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\sample_submission_syn.csv
+2025-05-19 16:58:38,276 [INFO] synthetic_sampler:652 Comparación guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\test_syn_compare.json
+2025-05-19 16:58:38,276 [INFO] synthetic_sampler:660 Archivo procesado: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\test.csv. Muestra sintética guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\test_syn.csv
+2025-05-19 17:03:30,531 [ERROR] synthetic_sampler:443 Error summarizing numeric stats for onpromotion: setting an array element with a sequence. The requested array has an inhomogeneous shape after 1 dimensions. The detected shape was (1254,) + inhomogeneous part.
+Traceback (most recent call last):
+  File "d:\Portafolio oficial\Retail Sales Trend Analysis\scripts\creation_syntetic.py", line 432, in summarize
+    np.nanmean(stats["values"], axis=0)
+  File "C:\Users\spinz\anaconda3\Lib\site-packages\numpy\lib\nanfunctions.py", line 1032, in nanmean
+    arr, mask = _replace_nan(a, 0)
+                ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\spinz\anaconda3\Lib\site-packages\numpy\lib\nanfunctions.py", line 96, in _replace_nan
+    a = np.asanyarray(a)
+        ^^^^^^^^^^^^^^^^
+ValueError: setting an array element with a sequence. The requested array has an inhomogeneous shape after 1 dimensions. The detected shape was (1254,) + inhomogeneous part.
+2025-05-19 17:03:31,447 [INFO] synthetic_sampler:652 Comparación guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\train_syn_compare.json
+2025-05-19 17:03:31,448 [INFO] synthetic_sampler:660 Archivo procesado: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\train.csv. Muestra sintética guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\train_syn.csv
+2025-05-19 17:03:31,474 [INFO] synthetic_sampler:724 Procesamiento completado. 9/9 archivos procesados exitosamente.
+2025-05-19 18:40:03,904 [INFO] synthetic_sampler:701 Usando 11 procesos en paralelo.
+2025-05-19 18:40:07,214 [INFO] synthetic_sampler:661 Comparación guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\stores_syn_compare.json
+2025-05-19 18:40:07,214 [INFO] synthetic_sampler:669 Archivo procesado: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\stores.csv. Muestra sintética guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\stores_syn.csv
+2025-05-19 18:40:07,366 [INFO] synthetic_sampler:661 Comparación guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\items_syn_compare.json
+2025-05-19 18:40:07,367 [INFO] synthetic_sampler:669 Archivo procesado: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\items.csv. Muestra sintética guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\items_syn.csv
+2025-05-19 18:40:07,478 [INFO] synthetic_sampler:661 Comparación guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\oil_syn_compare.json
+2025-05-19 18:40:07,478 [INFO] synthetic_sampler:669 Archivo procesado: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\oil.csv. Muestra sintética guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\oil_syn.csv
+2025-05-19 18:40:07,496 [INFO] synthetic_sampler:661 Comparación guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\oil_raw_Dukascopy_syn_compare.json
+2025-05-19 18:40:07,496 [INFO] synthetic_sampler:669 Archivo procesado: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\oil_raw_Dukascopy.csv. Muestra sintética guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\oil_raw_Dukascopy_syn.csv
+2025-05-19 18:40:07,530 [INFO] synthetic_sampler:661 Comparación guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\holidays_events_syn_compare.json
+2025-05-19 18:40:07,530 [INFO] synthetic_sampler:669 Archivo procesado: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\holidays_events.csv. Muestra sintética guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\holidays_events_syn.csv
+2025-05-19 18:40:07,883 [INFO] synthetic_sampler:661 Comparación guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\transactions_syn_compare.json
+2025-05-19 18:40:07,885 [INFO] synthetic_sampler:669 Archivo procesado: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\transactions.csv. Muestra sintética guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\transactions_syn.csv
+2025-05-19 18:40:12,180 [INFO] synthetic_sampler:661 Comparación guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\sample_submission_syn_compare.json
+2025-05-19 18:40:12,180 [INFO] synthetic_sampler:669 Archivo procesado: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\sample_submission.csv. Muestra sintética guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\sample_submission_syn.csv
+2025-05-19 18:40:19,281 [INFO] synthetic_sampler:661 Comparación guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\test_syn_compare.json
+2025-05-19 18:40:19,281 [INFO] synthetic_sampler:669 Archivo procesado: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\test.csv. Muestra sintética guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\test_syn.csv
+2025-05-19 18:45:16,756 [INFO] synthetic_sampler:661 Comparación guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\train_syn_compare.json
+2025-05-19 18:45:16,771 [INFO] synthetic_sampler:669 Archivo procesado: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\train.csv. Muestra sintética guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\train_syn.csv
+2025-05-19 18:45:16,829 [INFO] synthetic_sampler:733 Procesamiento completado. 9/9 archivos procesados exitosamente.
+2025-05-19 19:14:19,986 [INFO] synthetic_sampler:700 Usando 11 procesos en paralelo.
+2025-05-19 19:14:23,107 [INFO] synthetic_sampler:660 Comparación guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\stores_syn_compare.json
+2025-05-19 19:14:23,107 [INFO] synthetic_sampler:668 Archivo procesado: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\stores.csv. Muestra sintética guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\stores_syn.csv
+2025-05-19 19:14:23,218 [INFO] synthetic_sampler:660 Comparación guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\items_syn_compare.json
+2025-05-19 19:14:23,218 [INFO] synthetic_sampler:668 Archivo procesado: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\items.csv. Muestra sintética guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\items_syn.csv
+2025-05-19 19:14:23,251 [INFO] synthetic_sampler:660 Comparación guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\oil_syn_compare.json
+2025-05-19 19:14:23,251 [INFO] synthetic_sampler:668 Archivo procesado: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\oil.csv. Muestra sintética guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\oil_syn.csv
+2025-05-19 19:14:23,268 [INFO] synthetic_sampler:660 Comparación guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\holidays_events_syn_compare.json
+2025-05-19 19:14:23,270 [INFO] synthetic_sampler:668 Archivo procesado: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\holidays_events.csv. Muestra sintética guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\holidays_events_syn.csv
+2025-05-19 19:14:23,390 [INFO] synthetic_sampler:660 Comparación guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\oil_raw_Dukascopy_syn_compare.json
+2025-05-19 19:14:23,390 [INFO] synthetic_sampler:668 Archivo procesado: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\oil_raw_Dukascopy.csv. Muestra sintética guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\oil_raw_Dukascopy_syn.csv
+2025-05-19 19:14:23,668 [INFO] synthetic_sampler:660 Comparación guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\transactions_syn_compare.json
+2025-05-19 19:14:23,668 [INFO] synthetic_sampler:668 Archivo procesado: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\transactions.csv. Muestra sintética guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\transactions_syn.csv
+2025-05-19 19:14:27,732 [INFO] synthetic_sampler:660 Comparación guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\sample_submission_syn_compare.json
+2025-05-19 19:14:27,732 [INFO] synthetic_sampler:668 Archivo procesado: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\sample_submission.csv. Muestra sintética guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\sample_submission_syn.csv
+2025-05-19 19:14:34,680 [INFO] synthetic_sampler:660 Comparación guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\test_syn_compare.json
+2025-05-19 19:14:34,680 [INFO] synthetic_sampler:668 Archivo procesado: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\test.csv. Muestra sintética guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\test_syn.csv
+2025-05-19 19:19:35,500 [INFO] synthetic_sampler:660 Comparación guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\train_syn_compare.json
+2025-05-19 19:19:35,518 [INFO] synthetic_sampler:668 Archivo procesado: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\train.csv. Muestra sintética guardada en: D:\Portafolio oficial\Retail Sales Trend Analysis\data\data\raw\train_syn.csv
+2025-05-19 19:19:35,555 [INFO] synthetic_sampler:732 Procesamiento completado. 9/9 archivos procesados exitosamente.
