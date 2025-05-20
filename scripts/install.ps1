@@ -1,6 +1,6 @@
 #!/usr/bin/env pwsh
 <#
-    start.ps1: Descarga imágenes y crea (sin arrancar) los contenedores definidos en infra/docker-compose.yml
+    install.ps1: Descarga imágenes y crea (sin arrancar) los contenedores definidos en infra/docker-compose.yml
     Compatible con PowerShell Core (Windows & Linux) y Windows PowerShell.
 #>
 
@@ -27,6 +27,19 @@ try {
     docker version > $null 2>&1
 } catch {
     Abort "Docker no encontrado o no está en ejecución."
+}
+
+# En Linux, asegurar docker compose plugin
+if ($platform -eq 'Linux') {
+    # Intentar instalación de docker compose plugin si no existe
+    if (-not (docker compose version -q 2>$null) -and -not (Get-Command docker-compose -ErrorAction SilentlyContinue)) {
+        Write-Host "→ Instalando docker compose plugin en Linux..."
+        try {
+            sudo apt-get update && sudo apt-get install -y docker-compose-plugin
+        } catch {
+            Abort "Error al instalar docker compose plugin en Linux."
+        }
+    }
 }
 
 # Ubicar docker-compose.yml
