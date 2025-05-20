@@ -35,9 +35,10 @@ if ($platform -eq 'Linux') {
     if (-not (docker compose version -q 2>$null) -and -not (Get-Command docker-compose -ErrorAction SilentlyContinue)) {
         Write-Host "→ Instalando docker compose plugin en Linux..."
         try {
-            sudo apt-get update && sudo apt-get install -y docker-compose-plugin
+            sudo apt-get update
+            sudo apt-get install -y docker-compose
         } catch {
-            Abort "Error al instalar docker compose plugin en Linux."
+            Abort "Error al instalar docker compose en Linux."
         }
     }
 }
@@ -53,8 +54,8 @@ Set-Location $composeDir
 Write-Host "→ Directorio de Compose: $PWD"
 
 # Seleccionar comando de Compose
-if (docker compose version -q 2>$null) { $composeCmd = 'docker compose' }
-elseif (Get-Command docker-compose -ErrorAction SilentlyContinue) { $composeCmd = 'docker-compose' }
+if (Get-Command docker-compose -ErrorAction SilentlyContinue) { $composeCmd = 'docker-compose' }
+elseif (docker compose version -q 2>$null) { $composeCmd = 'docker compose' }
 else { Abort "Ni 'docker compose' ni 'docker-compose' disponibles." }
 Write-Host "→ Usando: $composeCmd"
 
